@@ -12,7 +12,13 @@ G="\033[0;92m"
 R="\033[0;91m"
 D="\033[00m"
 
-TARGET=target/release/./alignement
+# catching the executable name in the Cargo.toml file
+# CONTEXT : using sed with options extended regex + silent mode
+# then encapsulating the name in a group 
+# then output the captured group with option p
+BIN=$(sed -En 's/name = "([^"]+)"/\1/p' Cargo.toml)
+
+TARGET=target/release/./"$BIN"
 
 #builds the rust executable if it doesnt exist
 if [ ! -e "$TARGET" ];then
@@ -25,8 +31,8 @@ if [ ! -e "$CPP" ];then
     make
     cd ../..
 fi
-#to run the program
-#->"$TARGET"
+# to run the program
+# "$TARGET"
 
 
 init()
@@ -34,7 +40,8 @@ init()
     mkdir trash
 }
 
-#used to test the difference between our binary and a cpp implementation binary
+# used to test the difference between the binary to test
+# and a cpp binary
 #USAGE : tes {file1} {file2} ...
 tes() {
     "$TARGET" "$@" > "$REF_OUT" 2> "$REF_ERR_OUT"
