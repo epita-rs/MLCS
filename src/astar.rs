@@ -8,7 +8,7 @@ fn h(p: &Vec<i32>) -> i32 {
 
 // We make S to be a ref to Vec instead of a ref 
 // to Array due to the possible unknown size of S.
-fn mlcs_astar(S : &Vec<&str>, d : usize) -> i32 {
+pub fn mlcs_astar(S : &Vec<&str>, d : usize) -> i32 {
 
     // "Definitions and Basic Properties"
 
@@ -75,15 +75,4 @@ fn mlcs_astar(S : &Vec<&str>, d : usize) -> i32 {
     }
 
     -1
-}
-
-fn main() {
-
-    let s1 = "Hey world";
-    let s2 = "Hello world !";
-    let s3 = "Hi world!";
-
-    let S = vec![s1, s2, s3];
-    
-    mlcs_astar(&S, 3);
 }
