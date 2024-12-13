@@ -48,6 +48,8 @@ mod test {
                       .expect("Should have been able to read the file"))
                   .collect();
        let casted: Vec<&str> = strings.iter().map(AsRef::as_ref).collect();
+       // uncomment this line when mlcs_astar will output strings |||
+       // rather than digits                                      vvv
        //assert_eq!(output_cpp.stdout, mlcs_astar(&casted, args.len())); 
     }
 }
