@@ -3,7 +3,7 @@
 ## Run the testsuite
 At the root of the repo, run the following command
 ```
-tests/./testsuite.sh
+./testsuite.sh
 ```
 ## Add your own tests 
 1. Add text files to the folder testfiles/
