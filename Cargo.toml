@@ -7,3 +7,7 @@ edition = "2021"
 
 [dependencies]
 priority-queue = "2.0.2"
+
+[[bench]]
+name = "my_benchmark"
+harness = false
