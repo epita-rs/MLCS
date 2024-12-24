@@ -17,7 +17,10 @@ fn score_matrix(s1: &str, s2: &str) -> Vec<Vec<u64>>
     for i in (0..(m - 1)).rev() {
         for j in (0..(n - 1)).rev() {
             M[i][j] = 
+            // not efficient line : O(n) for 2 access
+            // to be reviewed later on
             if s1.chars().nth(i + 1).unwrap() == s2.chars().nth(j + 1).unwrap()
+            //=================================================================
             {
                 M[i + 1][j + 1] + 1
             }
@@ -44,7 +47,7 @@ fn matrices_score(S : &Vec<&str>, d : usize) -> Vec<Vec<Vec<u64>>>
 }
 
 //given given 2D coordinates, translates into 1D coordinates
-fn translate(i: &usize, j: &usize, d: usize) -> usize
+fn translate(i: usize, j: usize, d: usize) -> usize
 {
     i * d + j 
 }
@@ -53,14 +56,39 @@ fn translate(i: &usize, j: &usize, d: usize) -> usize
 fn he(M:Vec<Vec<Vec<u64>>>, p:Vec<usize> , d: usize) -> u64
 {
     let mut similarity:Vec<u64> = vec![0; d];
-    for i in p.iter() {
-        for j in p.iter() {
-            similarity.push(M[translate(i, j, d)][*i][*j]);
+    for i in 0..d {
+        for j in 0..d {
+            if i != j {
+                similarity.push(M[translate(i, j, d)][p[i]][p[j]]);
+            }
         }
     }
 
     *similarity.iter().min().unwrap()
 }
+
+// given the list of strings, finds the alphabet
+fn get_alphabet(S : &Vec<&str>, d : usize) -> Vec<char>
+{
+    // OPTI comment
+    // use hashmap to keep track of inserted values
+    let mut alphabet:Vec<char> = vec![]; 
+    for s in S.iter()
+    {
+        for ch in s.chars()
+        {
+            // line running in O(n)
+            if !alphabet.contains(&ch)
+            // =======================
+            {
+                alphabet.push(ch);
+            }
+        }
+    }
+
+    alphabet
+}
+
 // We make S to be a ref to Vec instead of a ref 
 // to Array due to the possible unknown size of S.
 fn mlcs_astar(S : &Vec<&str>, d : usize) -> u64 {
