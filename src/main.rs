@@ -3,6 +3,11 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::cmp::max;
 
+// OPTI considerations
+// 1. use min-heap instead of a vec for O(1) access to next successor
+// plus O(log(n)) insertion
+// 2. precompute indexes using MT table
+
 fn h(a:&Vec<u64>) -> u64
 {
     // dummy to be later removed
@@ -34,7 +39,7 @@ fn score_matrix(s1: &str, s2: &str) -> Vec<Vec<u64>>
     M
 }
 // given the list of strings we compute the set of score matrices
-fn matrices_score(S : &Vec<&str>, d : usize) -> Vec<Vec<Vec<u64>>>
+fn matrices_score(S : &Vec<&str>) -> Vec<Vec<Vec<u64>>>
 {
        let mut scores: Vec<Vec<Vec<u64>>> = vec![];
        for s1 in S.iter() {
@@ -87,6 +92,52 @@ fn get_alphabet(S : &Vec<&str>, d : usize) -> Vec<char>
     }
 
     alphabet
+}
+/*
+fn find_next_match(ch:char, s: &str, start_pos:usize, size:usize) -> usize
+{
+    // TODO   
+}
+*/
+// gets the successors of a specific point
+fn get_successors(alphabet : &Vec<char>, S : &Vec<&str>, p: &Vec<usize>) 
+-> Vec<Vec<usize>>
+{
+    // OPTI : we may be passing the alphabet param directly as an iterator
+    let mut successors:Vec<Vec<usize>> = vec![];
+    // for all alphabet letters
+    for ch in alphabet.iter()
+    {
+        let mut i = 0;
+        let mut succ:Vec<usize> = vec![]; 
+        // for each string, finds the next position of that letter
+        for s in S.iter()
+        {
+            // starting the search at the current point index
+            let mut j = p[i];
+            let n = s.chars().count();
+            // line below is ridiculous, O(n) for each access
+            while j < n && s.chars().nth(j).unwrap() != *ch
+            //================================================
+            {
+                j += 1;
+            }
+            if j < n {
+                succ.push(j);
+            }
+            else
+            {
+               // discard the letter if its absent from any string
+               break; 
+            }
+            i += 1;
+        }
+        if succ.len() == S.len()
+        {
+            successors.push(succ);
+        }
+    }
+    successors
 }
 
 // We make S to be a ref to Vec instead of a ref 
