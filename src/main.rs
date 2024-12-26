@@ -191,9 +191,48 @@ fn reorder_queue(Q: &mut Vec<Vec<usize>>, i: &mut Infos)
             }
         });
 }
+// ascend back up the parent tree to form the string
+fn common_seq(i :&Infos, p: &Vec<usize>, S: &Vec<&str>) -> String
+{
+    let mut s = String::from(S[0].chars().nth(p[0]).unwrap());
+    let mut p = p;
+    while *i.parents.get(p).unwrap() != None {
+        p = &i.parents.get(p).unwrap().as_ref().unwrap(); 
+        // Inefficient line again O(n)
+        s.push(S[0].chars().nth(p[0]).unwrap());
+        // ============================
+    }
+    s.chars().rev().collect::<String>()
+}
+
+//Common seq
+// TODO please document here
+            /*
+            struct CommonSeq<'s> {
+                f: &'s dyn Fn(&CommonSeq, &Vec<usize>) -> u64 
+            }
+            let tmp = CommonSeq {
+                f: &|core, p| {
+
+                    let parent_p = infos.parents.get(p);
+                    if parent_p != None && *parent_p.unwrap() != None {
+                        (core.f)(core, &parent_p.unwrap().clone().unwrap());
+                    }
+
+                    // print!(S[0][p]); 
+                    
+                    // If the algorithm is correct,
+                    // then it should never be None.
+                    *infos.g.get(p).unwrap()
+                }
+            };
+            return (tmp.f)(&tmp, &p);
+            */
+//============================================================================
+
 // We make S to be a ref to Vec instead of a ref 
 // to Array due to the possible unknown size of S.
-fn mlcs_astar(S : &Vec<&str>, d : usize) -> u64 {
+fn mlcs_astar(S : &Vec<&str>, d : usize) -> String {
 
     // "Definitions and Basic Properties"
 
@@ -215,27 +254,7 @@ fn mlcs_astar(S : &Vec<&str>, d : usize) -> u64 {
         let p:Vec<usize> = Q.pop().unwrap().clone();
 
         if h(&infos.MS, &p, d) == 0 {
-            //TODO actually return something
-            // please document here
-            struct CommonSeq<'s> {
-                f: &'s dyn Fn(&CommonSeq, &Vec<usize>) -> u64 
-            }
-            let tmp = CommonSeq {
-                f: &|core, p| {
-
-                    let parent_p = infos.parents.get(p);
-                    if parent_p != None && *parent_p.unwrap() != None {
-                        (core.f)(core, &parent_p.unwrap().clone().unwrap());
-                    }
-
-                    // print!(S[0][p]); 
-                    
-                    // If the algorithm is correct,
-                    // then it should never be None.
-                    *infos.g.get(p).unwrap()
-                }
-            };
-            return (tmp.f)(&tmp, &p);
+            return common_seq(&infos, &p, S);
         }
         else
         {
@@ -251,7 +270,7 @@ fn mlcs_astar(S : &Vec<&str>, d : usize) -> u64 {
 
     }
 
-    1
+    return String::from("Nothing was found!");
 }
 
 fn main() {
@@ -262,5 +281,6 @@ fn main() {
 
     let S = vec![s1, s2, s3];
     
-    mlcs_astar(&S, 3);
+    let res = mlcs_astar(&S, 3);
+    println!("{}", res);
 }
