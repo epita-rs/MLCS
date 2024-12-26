@@ -2,29 +2,27 @@ use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::cmp::max;
+use std::rc::Rc;
 
 // OPTI considerations
 // 1. use min-heap instead of a vec for O(1) access to next successor
 // plus O(log(n)) insertion
 // 2. precompute indexes using MT table
+// 3. Store pointers instead of cloning everything everywhere
+// Look at Rc and RefCell
 
-fn h(a:&Vec<u64>) -> u64
-{
-    // dummy to be later removed
-    1
-}
 // given two strings s1 and s2 we compute the score matrix
 fn score_matrix(s1: &str, s2: &str) -> Vec<Vec<u64>>
 {
     let n = s1.chars().count();
     let m = s2.chars().count();
     let mut M:Vec<Vec<u64>> = vec![vec![0; n]; m];
-    for i in (0..(m - 1)).rev() {
-        for j in (0..(n - 1)).rev() {
+    for i in (0..(m - 2)).rev() {
+        for j in (0..(n - 2)).rev() {
             M[i][j] = 
             // not efficient line : O(n) for 2 access
             // to be reviewed later on
-            if s1.chars().nth(i + 1).unwrap() == s2.chars().nth(j + 1).unwrap()
+            if s2.chars().nth(i + 1).unwrap() == s1.chars().nth(j + 1).unwrap()
             //=================================================================
             {
                 M[i + 1][j + 1] + 1
@@ -58,7 +56,7 @@ fn translate(i: usize, j: usize, d: usize) -> usize
 }
 
 // given a point, computes the heuristic function
-fn he(M:Vec<Vec<Vec<u64>>>, p:Vec<usize> , d: usize) -> u64
+fn h(M:&Vec<Vec<Vec<u64>>>, p:&Vec<usize> , d: usize) -> u64
 {
     let mut similarity:Vec<u64> = vec![0; d];
     for i in 0..d {
@@ -73,7 +71,7 @@ fn he(M:Vec<Vec<Vec<u64>>>, p:Vec<usize> , d: usize) -> u64
 }
 
 // given the list of strings, finds the alphabet
-fn get_alphabet(S : &Vec<&str>, d : usize) -> Vec<char>
+fn get_alphabet(S : &Vec<&str>) -> Vec<char>
 {
     // OPTI comment
     // use hashmap to keep track of inserted values
@@ -113,8 +111,8 @@ fn get_successors(alphabet : &Vec<char>, S : &Vec<&str>, p: &Vec<usize>)
         // for each string, finds the next position of that letter
         for s in S.iter()
         {
-            // starting the search at the current point index
-            let mut j = p[i];
+            // starting the search at the current point index + 1
+            let mut j = p[i] + 1;
             let n = s.chars().count();
             // line below is ridiculous, O(n) for each access
             while j < n && s.chars().nth(j).unwrap() != *ch
@@ -139,7 +137,60 @@ fn get_successors(alphabet : &Vec<char>, S : &Vec<&str>, p: &Vec<usize>)
     }
     successors
 }
+// saves all the infos needed to perform the algo in one place
+pub struct Infos {
+    alphabet : Vec<char>,
+    parents : HashMap<Vec<usize>, Option<Vec<usize>>>,
+    MS : Vec<Vec<Vec<u64>>>,
+    g : HashMap<Vec<usize>, u64>,
+    f : HashMap<Vec<usize>, u64>,
+    d : usize
+}
+impl Infos {
+    // basic preprocessing
+    pub fn new(S : &Vec<&str>, d : usize) -> Self
+    {
+        let p0 = vec![0; d];
 
+        let alphabet:Vec<char> = get_alphabet(S);
+
+        let MS:Vec<Vec<Vec<u64>>> = matrices_score(S);
+
+        let mut parents : HashMap<_, Option<Vec<usize>>> = HashMap::new();
+        parents.insert(p0.clone(), None);
+
+        let mut g = HashMap::new();
+        g.insert(p0.clone(), 0);
+
+        let mut f: HashMap<Vec<usize>, u64> = HashMap::new();
+        f.insert(p0.clone(), h(&MS, &p0, d));
+
+        return Infos { alphabet, parents, MS, g, f, d};
+    }
+}
+// given a point p and his successor q, computes necessary informations
+fn update_suc(p:Vec<usize>, q:Vec<usize>, infos: &mut Infos)
+{
+    // g(q) = g(p) + 1
+    let nb = infos.g.get(&p).unwrap() + 1;
+    infos.g.insert(q.clone(), nb);
+    // saves the cost function for point p : h(p) + g(p)
+    infos.f.insert(q.clone(), h(&infos.MS, &q, infos.d) + nb);
+    // saves the fact that p is the parent of q
+    infos.parents.insert(q.clone(), Some(p));
+}
+
+fn reorder_queue(Q: &mut Vec<Vec<usize>>, i: &mut Infos)
+{
+    Q.sort_unstable_by(|p, q| {
+            if (i.f.get(p) > i.f.get(q)) || (i.f.get(p) == i.f.get(q) 
+            && h(&i.MS, p, i.d) > h(&i.MS, q, i.d)) {
+                Ordering::Greater
+            } else {
+                Ordering::Less
+            }
+        });
+}
 // We make S to be a ref to Vec instead of a ref 
 // to Array due to the possible unknown size of S.
 fn mlcs_astar(S : &Vec<&str>, d : usize) -> u64 {
@@ -147,61 +198,55 @@ fn mlcs_astar(S : &Vec<&str>, d : usize) -> u64 {
     // "Definitions and Basic Properties"
 
     // Preprocessing;
+    let mut infos = Infos::new(S, d);
 
     let p0 = vec![0; d];
-
-    let mut parents: HashMap<_, Option<&Vec<u64>>> = HashMap::new();
-    parents.insert(&p0, None);
-
-    let mut g = HashMap::new();
-    g.insert(&p0, 0);
-
-    let mut f: HashMap<&Vec<u64>, u64> = HashMap::new();
-    f.insert(&p0, h(&p0));
 
     // We make our own PriorityQueue based on a Vec
     // because the priority_queue package is not efficient
     // when we have a particular comparison function
     // to deal with.
-    let mut Q = vec![&p0];
-
-    let mut T: HashSet<&Vec<u64>> = HashSet::new();
+    let mut Q:Vec<Vec<usize>> = vec![p0];
 
     // The .len() Vec method returns a length variable
     // value rather than iterating over the vector.
     while Q.len() > 0 {
 
-        &Q.sort_unstable_by(|p, q| {
-            if (f[p] > f[q]) || (f[p] == f[q] && h(p) > h(q)) {
-                Ordering::Greater
-            } else {
-                Ordering::Less
-            }
-        });
-        let p = &Q.pop().unwrap();
+        let p:Vec<usize> = Q.pop().unwrap().clone();
 
-        if h(p) == 0 {
-
+        if h(&infos.MS, &p, d) == 0 {
+            //TODO actually return something
+            // please document here
             struct CommonSeq<'s> {
-                f: &'s dyn Fn(&CommonSeq, &Vec<u64>) -> u64 
+                f: &'s dyn Fn(&CommonSeq, &Vec<usize>) -> u64 
             }
             let tmp = CommonSeq {
                 f: &|core, p| {
 
-                    let parent_p = parents.get(p);
+                    let parent_p = infos.parents.get(p);
                     if parent_p != None && *parent_p.unwrap() != None {
-                        (core.f)(core, parent_p.unwrap().unwrap());
+                        (core.f)(core, &parent_p.unwrap().clone().unwrap());
                     }
 
-                    // print!(S[0][p]); // TODO
+                    // print!(S[0][p]); 
                     
                     // If the algorithm is correct,
                     // then it should never be None.
-                    *g.get(p).unwrap()
+                    *infos.g.get(p).unwrap()
                 }
             };
-            return (tmp.f)(&tmp, p);
+            return (tmp.f)(&tmp, &p);
+        }
+        else
+        {
+            // inserting all succesors in the queue
+            let succs = get_successors(&infos.alphabet, &S, &p);
+            for q in succs {
+                update_suc(p.clone(), q.clone(), &mut infos);
+                Q.push(q);
+            }
 
+            reorder_queue(&mut Q, &mut infos);
         }
 
     }
