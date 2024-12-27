@@ -12,17 +12,17 @@ use std::rc::Rc;
 // Look at Rc and RefCell
 
 // given two strings s1 and s2 we compute the score matrix
-fn score_matrix(s1: &str, s2: &str) -> Vec<Vec<u64>>
+pub fn score_matrix(s1: &str, s2: &str) -> Vec<Vec<u64>>
 {
-    let n = s1.chars().count();
-    let m = s2.chars().count();
-    let mut M:Vec<Vec<u64>> = vec![vec![0; n]; m];
-    for i in (0..(m - 2)).rev() {
-        for j in (0..(n - 2)).rev() {
+    let m = s1.chars().count();
+    let n = s2.chars().count();
+    let mut M:Vec<Vec<u64>> = vec![vec![0; n + 1]; m + 1];
+    for i in (0..(m - 1)).rev() {
+        for j in (0..(n - 1)).rev() {
             M[i][j] = 
                 // not efficient line : O(n) for 2 access
                 // to be reviewed later on
-                if s2.chars().nth(i + 1).unwrap() == s1.chars().nth(j + 1).unwrap()
+                if s1.chars().nth(i + 1).unwrap() == s2.chars().nth(j + 1).unwrap()
                     //=============================================================
                 {
                     M[i + 1][j + 1] + 1
@@ -37,7 +37,7 @@ fn score_matrix(s1: &str, s2: &str) -> Vec<Vec<u64>>
     M
 }
 // given the list of strings we compute the set of score matrices
-fn matrices_score(S : &Vec<&str>) -> Vec<Vec<Vec<u64>>>
+pub fn matrices_score(S : &Vec<&str>) -> Vec<Vec<Vec<u64>>>
 {
     let mut scores: Vec<Vec<Vec<u64>>> = vec![];
     for s1 in S.iter() {
@@ -71,7 +71,7 @@ fn h(M:&Vec<Vec<Vec<u64>>>, p:&Vec<usize> , d: usize) -> u64
 }
 
 // given the list of strings, finds the alphabet
-fn get_alphabet(S : &Vec<&str>) -> Vec<char>
+pub fn get_alphabet(S : &Vec<&str>) -> Vec<char>
 {
     // OPTI comment
     // use hashmap to keep track of inserted values
@@ -98,7 +98,7 @@ fn get_alphabet(S : &Vec<&str>) -> Vec<char>
 }
  */
 // gets the successors of a specific point
-fn get_successors(alphabet : &Vec<char>, S : &Vec<&str>, p: &Vec<usize>) 
+pub fn get_successors(alphabet : &Vec<char>, S : &Vec<&str>, p: &Vec<usize>) 
     -> Vec<Vec<usize>>
 {
     // OPTI : we may be passing the alphabet param directly as an iterator
@@ -184,7 +184,7 @@ fn reorder_queue(Q: &mut Vec<Vec<usize>>, i: &mut Infos)
 {
     Q.sort_unstable_by(|p, q| {
             if (i.f.get(p) > i.f.get(q)) || (i.f.get(p) == i.f.get(q) 
-                    && h(&i.MS, p, i.d) > h(&i.MS, q, i.d)) {
+                   && h(&i.MS, p, i.d) > h(&i.MS, q, i.d)) {
             Ordering::Greater
             } else {
             Ordering::Less
@@ -261,8 +261,12 @@ pub fn mlcs_astar(S : &Vec<&str>, d : usize) -> String {
             // inserting all succesors in the queue
             let succs = get_successors(&infos.alphabet, &S, &p);
             for q in succs {
-                update_suc(p.clone(), q.clone(), &mut infos);
-                Q.push(q);
+                // basically saying if the queue Q does not already 
+                // contain the point q
+                if !Q.contains(&q) {
+                    update_suc(p.clone(), q.clone(), &mut infos);
+                    Q.push(q);
+                }
             }
 
             reorder_queue(&mut Q, &mut infos);
