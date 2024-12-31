@@ -63,6 +63,18 @@ mod test {
         assert_eq!(mlcs_astar(&s, 3), "H world");
     }
     #[test]
+    fn basic_7_1() {
+        let s1 = "gxtxayb"; 
+        let s2 = "abgtab"; 
+        let s3 = "gyaytahjb"; 
+        let s4 = "gyayjjjtab"; 
+        let s5 = "gyaytahhhhb"; 
+        let s6 = "ygaytppppahjb"; 
+        let s7 = "ylllgaytmmajb"; 
+        let s = vec![s1, s2, s3, s4, s5, s6, s7];
+        assert_eq!(mlcs_astar(&s, 7), "gtab");
+    }
+    #[test]
     fn same_3_1() {
         let s1 = "gtab"; 
         let s2 = "gtab"; 
