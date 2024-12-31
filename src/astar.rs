@@ -263,8 +263,8 @@ pub fn mlcs_astar(S : &Vec<&str>, d : usize) -> String {
             for q in succs {
                 // basically saying if the queue Q does not already 
                 // contain the point q
+                update_suc(p.clone(), q.clone(), &mut infos);
                 if !Q.contains(&q) {
-                    update_suc(p.clone(), q.clone(), &mut infos);
                     Q.push(q);
                 }
             }
