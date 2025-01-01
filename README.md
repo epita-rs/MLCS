@@ -11,10 +11,15 @@ A Crate for finding the MLCS of an arbitrarily big number of strings
     cd MLCS
     ```
 
-2. **Produce the binary**
+2. **Start the tests**
 
     ```sh
     cargo test --release
+    ```
+3. **Start the performance benchmark**
+
+    ```sh
+    cargo bench
     ```
 ## Documentation
 Interesting ressources concerning mlcs : https://github.com/lmcarreiro/multiple-lcs?tab=readme-ov-file.
