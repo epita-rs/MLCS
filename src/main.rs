@@ -12,5 +12,6 @@ fn main() {
     let S = vec![s1, s2, s3, s4];
     
     let res = mlcs_astar(&S, 4);
+    
     println!("{}", res);
 }

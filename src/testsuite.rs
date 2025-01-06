@@ -1,10 +1,73 @@
 use crate::astar;
 use astar::*;
+use rand::{seq::SliceRandom, thread_rng, Rng}; // Random number generator
+
+// @brief : shuffles a string
+fn shuffle_string(input: &str) -> String {
+    let mut chars:Vec<char> = input.chars().collect();
+    let mut rng = thread_rng();
+    chars.shuffle(&mut rng);
+    chars.into_iter().collect()
+}
+// @brief generates an random alphabet in the whole unicode range
+// TODO keeping printable characters
+
+fn gen_rand_alphabet(count:usize) -> Vec<char>
+{
+    let mut rng = thread_rng(); 
+    let mut alphabet:Vec<char> = vec![];
+    while alphabet.len() < count {
+        let ch = char::from_u32(rng.gen_range(0..0x10FFFF)).unwrap();
+        if !ch.is_control()
+        {
+            alphabet.push(ch);
+        }
+    }
+    alphabet
+}
+
+// @brief: Outputs {nb} strings of size {length} with their MLCS being {pattern}
+// OPTI: pattern could be a Vec<char> in the future
+// @remark: The idea is to insert at random positions in every string 
+// so that the MLCS doesnt change
+fn generate_testcase(pattern:&str, nb:usize, length: usize) -> Vec<String>{
+    let alphab = "abcdefghijklmnopqrstuvwxyz\
+    ABCDEFGHIJKLMNOPQRSTUVWXYZ098765432[]#/.,{}~@?><";
+    let mut rng = thread_rng();
+
+    // building an alphabet free from characters in pattern
+    let mut alphabet:Vec<char> = alphab.chars()
+        .filter(|x| !pattern.contains(*x)).collect();
+    alphabet.shuffle(&mut rng);
+    alphabet.truncate(nb);
+
+    let n = alphabet.len();
+    let plen = pattern.len();
+   
+    let mut res:Vec<String> = vec![];
+    // picking a new unique character
+    for ch in alphabet {
+        let mut new_str:Vec<char> = pattern.chars().collect();
+
+        // positions is a list of random positions
+        let mut positions:Vec<usize> = (0..=plen).collect();
+        positions.shuffle(&mut rng);
+
+        // inserting 
+        for pos in positions {
+            // inserting at rand position the chosen character
+            new_str.insert(pos, ch);
+        }
+
+        res.push(new_str.into_iter().collect());
+    }
+    res
+}
 
 #[cfg(test)]
 mod unit {
     use super::*;
-
+    
     #[test]
     fn get_successors_simple() {
         let s1 = "abcde";
@@ -57,6 +120,24 @@ mod unit {
 #[cfg(test)]
 mod functionnal {
     use super::*;
+
+    #[test]
+    fn random_7_30() {
+        let pattern = "99776ghg";
+        let s_string = generate_testcase(&pattern, 7, 30);
+        // Line below is a basic cast from Vec<String> to Vec<&str>
+        let s = s_string.iter().map(|x| x.as_str()).collect();
+        println!("{:?}", s);
+        assert_eq!(mlcs_astar(&s, s.len()), pattern);
+    }
+    #[test]
+    fn random_20_40() {
+        let pattern = "mouahahahahahahahihihihhohohoho";
+        let s_string = generate_testcase(&pattern, 10, 40);
+        // Line below is a basic cast from Vec<String> to Vec<&str>
+        let s = s_string.iter().map(|x| x.as_str()).collect();
+        assert_eq!(mlcs_astar(&s, s.len()), pattern);
+    }
 
     #[test]
     fn basic_3_1() {
