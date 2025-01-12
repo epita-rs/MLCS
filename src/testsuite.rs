@@ -31,7 +31,8 @@ fn gen_rand_alphabet(count:usize) -> Vec<char>
 // OPTI: pattern could be a Vec<char> in the future
 // @remark: The idea is to insert at random positions in every string 
 // so that the MLCS doesnt change
-fn generate_testcase(pattern:&str, nb:usize, length: usize) -> Vec<String>{
+// @WARNING do not generate over ~100 strings
+pub fn generate_testcase(pattern:&str, nb:usize, length: usize) -> Vec<String>{
     let alphab = "abcdefghijklmnopqrstuvwxyz\
     ABCDEFGHIJKLMNOPQRSTUVWXYZ098765432[]#/.,{}~@?><\
     БбВвГгДдЁёЖжЗзИиЙйКкЛлПпФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяi\
