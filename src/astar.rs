@@ -302,5 +302,5 @@ pub fn mlcs_astar(S : &Vec<&str>, d : usize) -> String {
         }
 
     }
-    return String::from("Nothing was found!");
+    return String::from("");
 }
