@@ -17,7 +17,7 @@ fn gen_rand_alphabet(count:usize) -> Vec<char>
     let mut rng = thread_rng(); 
     let mut alphabet:Vec<char> = vec![];
     while alphabet.len() < count {
-        let ch = char::from_u32(rng.gen_range(0..0x10FFFF)).unwrap();
+        let ch = char::from_u32(rng.gen_range(61..0x589)).unwrap();
         if !ch.is_control()
         {
             alphabet.push(ch);
@@ -32,7 +32,11 @@ fn gen_rand_alphabet(count:usize) -> Vec<char>
 // so that the MLCS doesnt change
 fn generate_testcase(pattern:&str, nb:usize, length: usize) -> Vec<String>{
     let alphab = "abcdefghijklmnopqrstuvwxyz\
-    ABCDEFGHIJKLMNOPQRSTUVWXYZ098765432[]#/.,{}~@?><";
+    ABCDEFGHIJKLMNOPQRSTUVWXYZ098765432[]#/.,{}~@?><\
+    БбВвГгДдЁёЖжЗзИиЙйКкЛлПпФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяi\
+    段包含许多汉字文字字符串用于测试展示中文字符简体繁体标点符号句号逗号问号\
+    床前明月光疑是地上霜举头望低思故乡学习编程数据算法计算机网络科技发展未来\
+    文化艺术传统创新🚀👩🤶🎅🎄👸🤴🍳🌾🎓🎤💻🔬🎨🚒✈️";
     let mut rng = thread_rng();
 
     // building an alphabet free from characters in pattern
