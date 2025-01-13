@@ -34,7 +34,7 @@ fn gen_rand_alphabet(count:usize) -> Vec<char>
 // @WARNING do not generate over ~100 strings
 pub fn generate_testcase(pattern:&str, nb:usize, length: usize) -> Vec<String>{
     let alphab = "abcdefghijklmnopqrstuvwxyz\
-    ABCDEFGHIJKLMNOPQRSTUVWXYZ098765432[]#/.,{}~@?><\
+    ABCDEFGHIJKLMNOPQRSTUVWXYZ098765432[]#/.,{}~@?<>*!£$%^&*(_+-=)\
     БбВвГгДдЁёЖжЗзИиЙйКкЛлПпФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯяi\
     段包含许多汉字文字字符串用于测试展示中文字符简体繁体标点符号句号逗号问号\
     床前明月光疑是地上霜举头望低思故乡学习编程数据算法计算机网络科技发展未来\

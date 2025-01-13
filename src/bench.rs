@@ -44,6 +44,15 @@ pub fn medium_random_2(c: &mut Criterion) {
             c.iter(|| mlcs_astar(black_box(&s), black_box(s.len()))));
 }
 
+pub fn medium_random_3(c: &mut Criterion) {
+    let pattern = "09876__fc---DFGKK&&&GYybhjgujbhdsvgcdD7fgyy_)87654(*&^";
+    let s_string = generate_testcase(&pattern, 80, 30);
+    // Line below is a basic cast from Vec<String> to Vec<&str>
+    let s = s_string.iter().map(|x| x.as_str()).collect();
+    c.bench_function("easy_random_80_30", |c|
+            c.iter(|| mlcs_astar(black_box(&s), black_box(s.len()))));
+}
+
 pub fn easy(c: &mut Criterion) {
     easy_1(c);
     easy_random_1(c);
@@ -54,6 +63,9 @@ pub fn medium(c: &mut Criterion) {
     medium_random_2(c);
 }
 
-
-criterion_group!(benches, easy_1, easy_random_1, medium_random_2, medium_random_2);
+criterion_group!(benches,
+                easy_1,
+                easy_random_1, 
+                medium_random_2, 
+                medium_random_3);
 criterion_main!(benches);

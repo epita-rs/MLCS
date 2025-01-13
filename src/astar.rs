@@ -15,44 +15,6 @@ const IMPOSSIBLE_NB:usize = 999_999_999_999;
 // 4. Build a common alphabet 
 // because no need to look for matchs that do not exists
 
-// given two strings s1 and s2 we compute the score matrix
-pub fn score_matrix(s1: &str, s2: &str) -> Vec<Vec<u64>>
-{
-    let m = s1.chars().count();
-    let n = s2.chars().count();
-    let mut M:Vec<Vec<u64>> = vec![vec![0; n + 1]; m + 1];
-    for i in (0..(m - 1)).rev() {
-        for j in (0..(n - 1)).rev() {
-            M[i][j] = 
-                // not efficient line : O(n) for 2 access
-                // to be reviewed later on
-                if s1.chars().nth(i + 1).unwrap() == s2.chars().nth(j + 1).unwrap()
-                    //=============================================================
-                {
-                    M[i + 1][j + 1] + 1
-                }
-                else
-                {
-                    max(M[i][j + 1], M[i + 1][j])
-                };
-        }
-    }
-
-    M
-}
-// given the list of strings we compute the set of score matrices
-pub fn matrices_score(S : &Vec<&str>) -> Vec<Vec<Vec<u64>>>
-{
-    let mut scores: Vec<Vec<Vec<u64>>> = vec![];
-    for s1 in S.iter() {
-        for s2 in S.iter() {
-            scores.push(score_matrix(s1, s2));
-        }
-    }
-
-    scores
-}
-
 //given given 2D coordinates, translates into 1D coordinates
 fn translate(i: usize, j: usize, d: usize) -> usize
 {
@@ -74,67 +36,6 @@ fn h(M:&Vec<Vec<Vec<u64>>>, p:&Vec<usize> , d: usize) -> u64
     *similarity.iter().min().unwrap()
 }
 
-// given the list of strings, finds the alphabet
-pub fn get_alphabet(S : &Vec<&str>) -> Vec<char>
-{
-    // OPTI comment
-    // use hashmap to keep track of inserted values
-    let mut alphabet:Vec<char> = vec![]; 
-    for s in S.iter()
-    {
-        for ch in s.chars()
-        {
-            // line running in O(n)
-            if !alphabet.contains(&ch)
-                // =======================
-            {
-                alphabet.push(ch);
-            }
-        }
-    }
-
-    alphabet
-}
-// gets the first matches 
-pub fn get_starting_p(alphabet : &Vec<char>, S : &Vec<&str>) -> Vec<Vec<usize>>
-{
-    // OPTI : we may be passing the alphabet param directly as an iterator
-    let mut successors:Vec<Vec<usize>> = vec![];
-    // for all alphabet letters
-    for ch in alphabet.iter()
-    {
-        let mut i = 0;
-        let mut succ:Vec<usize> = vec![]; 
-        // for each string, finds the next position of that letter
-        for s in S.iter()
-        {
-            // starting the search at the starting index
-            let mut j = 0;
-            let n = s.chars().count();
-            // line below is ridiculous, O(n) for each access
-            while j < n && s.chars().nth(j).unwrap() != *ch
-                //================================================
-            {
-                j += 1;
-            }
-            if j < n {
-                succ.push(j);
-            }
-            else
-            {
-                // discard the letter if its absent from any string
-                break; 
-            }
-            i += 1;
-        }
-        if succ.len() == S.len()
-        {
-            successors.push(succ);
-        }
-    }
-
-    successors
-}
 // gets the successors of a specific point
 pub fn get_successors(alphabet : &Vec<char>, S : &Vec<&str>, p: &Vec<usize>) 
     -> Vec<Vec<usize>>
@@ -175,6 +76,118 @@ pub fn get_successors(alphabet : &Vec<char>, S : &Vec<&str>, p: &Vec<usize>)
     }
     successors
 }
+
+// given two strings s1 and s2 we compute the score matrix
+pub fn score_matrix(s1: &str, s2: &str) -> Vec<Vec<u64>>
+{
+    let m = s1.chars().count();
+    let n = s2.chars().count();
+    let mut M:Vec<Vec<u64>> = vec![vec![0; n + 1]; m + 1];
+    for i in (0..(m - 1)).rev() {
+        for j in (0..(n - 1)).rev() {
+            M[i][j] = 
+                // not efficient line : O(n) for 2 access
+                // to be reviewed later on
+                if s1.chars().nth(i + 1).unwrap() == s2.chars().nth(j + 1).unwrap()
+                    //=============================================================
+                {
+                    M[i + 1][j + 1] + 1
+                }
+                else
+                {
+                    max(M[i][j + 1], M[i + 1][j])
+                };
+        }
+    }
+
+    M
+}
+
+// given the list of strings we compute the set of score matrices
+pub fn matrices_score(S : &Vec<&str>) -> Vec<Vec<Vec<u64>>>
+{
+    let mut scores: Vec<Vec<Vec<u64>>> = vec![];
+    for s1 in S.iter() {
+        for s2 in S.iter() {
+            scores.push(score_matrix(s1, s2));
+        }
+    }
+
+    scores
+}
+
+// given the list of strings, finds the alphabet
+pub fn get_alphabet(S : &Vec<&str>) -> Vec<char>
+{
+    // OPTI comment
+    // use hashmap to keep track of inserted values
+    let mut alphabet:Vec<char> = vec![]; 
+    for s in S.iter()
+    {
+        for ch in s.chars()
+        {
+            // line running in O(n)
+            if !alphabet.contains(&ch)
+                // =======================
+            {
+                alphabet.push(ch);
+            }
+        }
+    }
+
+    alphabet
+}
+
+// gets the first matches 
+pub fn get_starting_p(alphabet : &Vec<char>, S : &Vec<&str>) -> Vec<Vec<usize>>
+{
+    // OPTI : we may be passing the alphabet param directly as an iterator
+    let mut successors:Vec<Vec<usize>> = vec![];
+    // for all alphabet letters
+    for ch in alphabet.iter()
+    {
+        let mut i = 0;
+        let mut succ:Vec<usize> = vec![]; 
+        // for each string, finds the next position of that letter
+        for s in S.iter()
+        {
+            // starting the search at the starting index
+            let mut j = 0;
+            let n = s.chars().count();
+            // line below is ridiculous, O(n) for each access
+            while j < n && s.chars().nth(j).unwrap() != *ch
+                //================================================
+            {
+                j += 1;
+            }
+            if j < n {
+                succ.push(j);
+            }
+            else
+            {
+                // discard the letter if its absent from any string
+                break; 
+            }
+            i += 1;
+        }
+        if succ.len() == S.len()
+        {
+            successors.push(succ);
+        }
+    }
+
+    successors
+}
+
+// given the list of strings, finds their common alphabet
+pub fn get_common_alphabet(S : &Vec<Vec<char>>) -> Vec<char>
+{
+    // TODO get first line, collect the rest as hashmaps
+    //let mut alphabet:HashMap<char, bool> = S[-1];
+
+    vec![]
+}
+
 // saves all the infos needed to perform the algo in one place
 pub struct Infos {
 alphabet : Vec<char>,
@@ -205,6 +218,18 @@ impl Infos {
 
         return Infos { alphabet, parents, MS, g, f, d};
     }
+}
+
+// runs the successor a first time
+// this could be avoided
+fn init_queue(Q: &mut Vec<Vec<usize>>, S: &Vec<&str>, d:usize, infos:&mut Infos)
+{
+    *Q = get_starting_p(&infos.alphabet, &S);
+
+    for q in Q.clone() {
+        update_suc(vec![IMPOSSIBLE_NB; d], q.clone(), infos);
+    }
+    reorder_queue(Q, infos);
 }
 // given a point p and his successor q, computes necessary informations
 fn update_suc(p:Vec<usize>, q:Vec<usize>, infos: &mut Infos)
@@ -238,6 +263,7 @@ fn is_match(P: &Vec<usize>, S: &Vec<&str>) -> bool
     
     v.iter().all(|c| *c == first)
 }
+
 // ascend back up the parent tree to form the string
 fn common_seq(i :&Infos, p: &Vec<usize>, S: &Vec<&str>) -> String
 {
@@ -255,17 +281,7 @@ fn common_seq(i :&Infos, p: &Vec<usize>, S: &Vec<&str>) -> String
 
     s.iter().rev().collect::<String>()
 }
-// runs the successor a first time
-// this could be avoided
-fn init_queue(Q: &mut Vec<Vec<usize>>, S: &Vec<&str>, d:usize, infos:&mut Infos)
-{
-    *Q = get_starting_p(&infos.alphabet, &S);
 
-    for q in Q.clone() {
-        update_suc(vec![IMPOSSIBLE_NB; d], q.clone(), infos);
-    }
-    reorder_queue(Q, infos);
-}
 // We make S to be a ref to Vec instead of a ref 
 // to Array due to the possible unknown size of S.
 pub fn mlcs_astar(S : &Vec<&str>, d : usize) -> String {
