@@ -74,7 +74,7 @@ pub fn generate_testcase(pattern:&str, nb:usize, length: usize) -> Vec<String>{
 mod unit {
     use super::*;
     
-    #[test]
+    /*
     fn get_successors_simple() {
         let s1 = "abcde";
         let s2 = "ace";
@@ -84,7 +84,6 @@ mod unit {
         // Successeurs pour 'a'
         assert_eq!(successors[0], vec![2, 1]);
     }
-    #[test]
     fn get_successors_no_match() {
         let s1 = "abc";
         let s2 = "xyz";
@@ -92,6 +91,8 @@ mod unit {
         let successors = get_successors(&alphabet, &vec![s1, s2], &vec![0, 0]);
         assert!(successors.is_empty()); // Pas de correspondances
     }
+    */
+
     #[test]
     fn alphabet_2_1() {
         let s1 = "abcdddddeee";

@@ -15,6 +15,38 @@ const IMPOSSIBLE_NB:usize = 999_999_999_999;
 // 4. Build a common alphabet 
 // because no need to look for matchs that do not exists
 
+// builds the MT table used for accessing the index of the next char
+fn MT_table(alphabet:&Vec<char>, S:&Vec<&str>) -> Vec<Vec<Vec<usize>>>
+{
+    let sc:Vec<Vec<char>> = S.iter().map(|x| x.chars().collect()).collect();
+
+    let mut MT:Vec<Vec<Vec<usize>>> = vec![];
+
+    for s in sc {
+        let mut chain:Vec<Vec<usize>> = vec![];
+
+        for ch in alphabet {
+           let mut V:Vec<usize> = vec![IMPOSSIBLE_NB; s.len()];
+           let mut lpos = IMPOSSIBLE_NB; 
+
+           for i in (0..(s.len())).rev() {
+                if s[i] == *ch {
+                    lpos = i;
+                }
+
+                V[i] = lpos;
+           }
+
+           chain.push(V);
+        }
+
+        MT.push(chain);
+    }
+    
+    MT
+}
+
+
 //given given 2D coordinates, translates into 1D coordinates
 fn translate(i: usize, j: usize, d: usize) -> usize
 {
@@ -37,42 +69,35 @@ fn h(M:&Vec<Vec<Vec<u64>>>, p:&Vec<usize> , d: usize) -> u64
 }
 
 // gets the successors of a specific point
-pub fn get_successors(alphabet : &Vec<char>, S : &Vec<&str>, p: &Vec<usize>) 
+pub fn get_successors(infos: &Infos, S : &Vec<&str>, p: &Vec<usize>) 
     -> Vec<Vec<usize>>
 {
     // OPTI : we may be passing the alphabet param directly as an iterator
     let mut successors:Vec<Vec<usize>> = vec![];
+    let mut ch_idx:usize = 0;
+
     // for all alphabet letters
-    for ch in alphabet.iter()
+    for ch in infos.alphabet.iter()
     {
-        let mut i = 0;
-        let mut succ:Vec<usize> = vec![]; 
         // for each string, finds the next position of that letter
-        for s in S.iter()
+        let mut succ:Vec<usize> = vec![]; 
+        for i in 0..(S.len())
         {
-            // starting the search at the current point index + 1
-            let mut j = p[i] + 1;
-            let n = s.chars().count();
-            // line below is ridiculous, O(n) for each access
-            while j < n && s.chars().nth(j).unwrap() != *ch
-                //================================================
+            let next_ch_idx = infos.MT[i][ch_idx][p[i] + 1];
+            if next_ch_idx == IMPOSSIBLE_NB
             {
-                j += 1;
+                break;
             }
-            if j < n {
-                succ.push(j);
-            }
-            else
-            {
-                // discard the letter if its absent from any string
-                break; 
-            }
-            i += 1;
+
+            succ.push(next_ch_idx);
         }
+
         if succ.len() == S.len()
         {
             successors.push(succ);
         }
+
+        ch_idx += 1;
     }
     successors
 }
@@ -139,41 +164,34 @@ pub fn get_alphabet(S : &Vec<&str>) -> Vec<char>
 }
 
 // gets the first matches 
-pub fn get_starting_p(alphabet : &Vec<char>, S : &Vec<&str>) -> Vec<Vec<usize>>
+pub fn get_starting_p(infos: &Infos, S: &Vec<&str>) -> Vec<Vec<usize>>
 {
     // OPTI : we may be passing the alphabet param directly as an iterator
     let mut successors:Vec<Vec<usize>> = vec![];
+    let mut ch_idx:usize = 0;
+
     // for all alphabet letters
-    for ch in alphabet.iter()
+    for ch in infos.alphabet.iter()
     {
-        let mut i = 0;
-        let mut succ:Vec<usize> = vec![]; 
         // for each string, finds the next position of that letter
-        for s in S.iter()
+        let mut succ:Vec<usize> = vec![]; 
+        for i in 0..(S.len())
         {
-            // starting the search at the starting index
-            let mut j = 0;
-            let n = s.chars().count();
-            // line below is ridiculous, O(n) for each access
-            while j < n && s.chars().nth(j).unwrap() != *ch
-                //================================================
+            let next_ch_idx = infos.MT[i][ch_idx][0];
+            if next_ch_idx == IMPOSSIBLE_NB
             {
-                j += 1;
+                break;
             }
-            if j < n {
-                succ.push(j);
-            }
-            else
-            {
-                // discard the letter if its absent from any string
-                break; 
-            }
-            i += 1;
+
+            succ.push(next_ch_idx);
         }
+
         if succ.len() == S.len()
         {
             successors.push(succ);
         }
+
+        ch_idx += 1;
     }
 
     successors
@@ -193,6 +211,7 @@ pub struct Infos {
 alphabet : Vec<char>,
          parents : HashMap<Vec<usize>, Option<Vec<usize>>>,
          MS : Vec<Vec<Vec<u64>>>,
+         MT : Vec<Vec<Vec<usize>>>,
          g : HashMap<Vec<usize>, u64>,
          f : HashMap<Vec<usize>, u64>,
          d : usize
@@ -215,8 +234,10 @@ impl Infos {
 
         let mut f: HashMap<Vec<usize>, u64> = HashMap::new();
         f.insert(p0.clone(), 0);
+        
+        let MT = MT_table(&alphabet, &S);
 
-        return Infos { alphabet, parents, MS, g, f, d};
+        return Infos { alphabet, parents, MS, MT, g, f, d};
     }
 }
 
@@ -224,13 +245,14 @@ impl Infos {
 // this could be avoided
 fn init_queue(Q: &mut Vec<Vec<usize>>, S: &Vec<&str>, d:usize, infos:&mut Infos)
 {
-    *Q = get_starting_p(&infos.alphabet, &S);
+    *Q = get_starting_p(&infos, &S);
 
     for q in Q.clone() {
         update_suc(vec![IMPOSSIBLE_NB; d], q.clone(), infos);
     }
     reorder_queue(Q, infos);
 }
+
 // given a point p and his successor q, computes necessary informations
 fn update_suc(p:Vec<usize>, q:Vec<usize>, infos: &mut Infos)
 {
@@ -243,6 +265,7 @@ fn update_suc(p:Vec<usize>, q:Vec<usize>, infos: &mut Infos)
     infos.parents.insert(q.clone(), Some(p));
 }
 
+// sorts the queue
 fn reorder_queue(Q: &mut Vec<Vec<usize>>, i: &mut Infos)
 {
     Q.sort_unstable_by(|p, q| {
@@ -304,7 +327,7 @@ pub fn mlcs_astar(S : &Vec<&str>, d : usize) -> String {
         else
         {
             // inserting all succesors in the queue
-            let succs = get_successors(&infos.alphabet, &S, &p);
+            let succs = get_successors(&infos, &S, &p);
             for q in succs {
                 // basically saying if the queue Q does not already 
                 // contain the point q
