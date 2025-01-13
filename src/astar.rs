@@ -9,28 +9,28 @@ const IMPOSSIBLE_NB:usize = 999_999_999_999;
 // OPTI considerations
 // 1. use min-heap instead of a vec for O(1) access to next successor
 // plus O(log(n)) insertion
-// 2. precompute indexes using MT table
-// 3. Store pointers instead of cloning everything everywhere
+// 2. Store pointers instead of cloning everything everywhere
 // Look at Rc and RefCell
-// 4. Build a common alphabet 
-// because no need to look for matchs that do not exists
 
 // builds the MT table used for accessing the index of the next char
-fn MT_table(alphabet:&Vec<char>, S:&Vec<&str>) -> Vec<Vec<Vec<usize>>>
+// builds the common alphabet at the same time
+// @params ca is the common alphabet
+fn MT_table(S:&Vec<&str>, alphabet: &mut Vec<char>)
+       -> Vec<Vec<Vec<usize>>>
 {
-    let sc:Vec<Vec<char>> = S.iter().map(|x| x.chars().collect()).collect();
+    let sc:Vec<Vec<char>> = S.iter().map(|s| s.chars().collect()).collect();
 
     let mut MT:Vec<Vec<Vec<usize>>> = vec![];
 
-    for s in sc {
+    for ch in alphabet.clone() {
         let mut chain:Vec<Vec<usize>> = vec![];
 
-        for ch in alphabet {
+        for s in &sc {
            let mut V:Vec<usize> = vec![IMPOSSIBLE_NB; s.len()];
            let mut lpos = IMPOSSIBLE_NB; 
 
            for i in (0..(s.len())).rev() {
-                if s[i] == *ch {
+                if s[i] == ch {
                     lpos = i;
                 }
 
@@ -38,9 +38,17 @@ fn MT_table(alphabet:&Vec<char>, S:&Vec<&str>) -> Vec<Vec<Vec<usize>>>
            }
 
            chain.push(V);
+
+           if lpos == IMPOSSIBLE_NB {
+                alphabet.retain(|&x| x != ch);
+                chain = vec![];
+                break;
+           }
         }
 
-        MT.push(chain);
+        if !chain.is_empty() {
+            MT.push(chain);
+        }
     }
     
     MT
@@ -83,7 +91,7 @@ pub fn get_successors(infos: &Infos, S : &Vec<&str>, p: &Vec<usize>)
         let mut succ:Vec<usize> = vec![]; 
         for i in 0..(S.len())
         {
-            let next_ch_idx = infos.MT[i][ch_idx][p[i] + 1];
+            let next_ch_idx = infos.MT[ch_idx][i][p[i] + 1];
             if next_ch_idx == IMPOSSIBLE_NB
             {
                 break;
@@ -141,24 +149,20 @@ pub fn matrices_score(S : &Vec<&str>) -> Vec<Vec<Vec<u64>>>
     scores
 }
 
-// given the list of strings, finds the alphabet
+// given the list of strings, finds the minimal alphabet
+// @detail finds the shortest string
+// gets his alphabet
 pub fn get_alphabet(S : &Vec<&str>) -> Vec<char>
 {
     // OPTI comment
     // use hashmap to keep track of inserted values
-    let mut alphabet:Vec<char> = vec![]; 
-    for s in S.iter()
-    {
-        for ch in s.chars()
-        {
-            // line running in O(n)
-            if !alphabet.contains(&ch)
-                // =======================
-            {
-                alphabet.push(ch);
-            }
-        }
-    }
+    let mut alphabet:Vec<char> = S.iter()
+                                  .min_by_key(|s| s.len())
+                                  .expect("No minimum found")
+                                  .chars()
+                                  .collect(); 
+    alphabet.sort();
+    alphabet.dedup();
 
     alphabet
 }
@@ -177,7 +181,7 @@ pub fn get_starting_p(infos: &Infos, S: &Vec<&str>) -> Vec<Vec<usize>>
         let mut succ:Vec<usize> = vec![]; 
         for i in 0..(S.len())
         {
-            let next_ch_idx = infos.MT[i][ch_idx][0];
+            let next_ch_idx = infos.MT[ch_idx][i][0];
             if next_ch_idx == IMPOSSIBLE_NB
             {
                 break;
@@ -208,7 +212,7 @@ pub fn get_common_alphabet(S : &Vec<Vec<char>>) -> Vec<char>
 
 // saves all the infos needed to perform the algo in one place
 pub struct Infos {
-alphabet : Vec<char>,
+         alphabet : Vec<char>,
          parents : HashMap<Vec<usize>, Option<Vec<usize>>>,
          MS : Vec<Vec<Vec<u64>>>,
          MT : Vec<Vec<Vec<usize>>>,
@@ -222,8 +226,6 @@ impl Infos {
     {
         let p0 = vec![IMPOSSIBLE_NB; d];
 
-        let alphabet:Vec<char> = get_alphabet(S);
-
         let MS:Vec<Vec<Vec<u64>>> = matrices_score(S);
 
         let mut parents : HashMap<_, Option<Vec<usize>>> = HashMap::new();
@@ -235,7 +237,9 @@ impl Infos {
         let mut f: HashMap<Vec<usize>, u64> = HashMap::new();
         f.insert(p0.clone(), 0);
         
-        let MT = MT_table(&alphabet, &S);
+        let mut alphabet:Vec<char> = get_alphabet(S);
+
+        let MT = MT_table(&S, &mut alphabet);
 
         return Infos { alphabet, parents, MS, MT, g, f, d};
     }
@@ -313,6 +317,7 @@ pub fn mlcs_astar(S : &Vec<&str>, d : usize) -> String {
     let mut infos = Infos::new(S, d);
 
     // Queue
+    //let mut Q:BinaryHeap<Reverse<Vec<usize>>>;
     let mut Q:Vec<Vec<usize>> = vec![];
     init_queue(&mut Q, S, d, &mut infos);
 

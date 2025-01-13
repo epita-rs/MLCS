@@ -99,7 +99,7 @@ mod unit {
         let s2 = "aaaaaffgghijjjkllll";
         let alphabet = get_alphabet(&vec![s1, s2]);
         let res:String = alphabet.into_iter().collect();
-        assert_eq!(res, "abcdefghijkl");
+        assert_eq!(res, "abcde");
     }
     #[test]
     fn alphabet_3_1() {
@@ -108,7 +108,7 @@ mod unit {
         let s3 = "aaaaaffgghijjjk####!llll";
         let alphabet = get_alphabet(&vec![s1, s2, s3]);
         let res:String = alphabet.into_iter().collect();
-        assert_eq!(res, "abcdefghijkl#!");
+        assert_eq!(res, "abcde");
     }
     #[test]
     fn alphabet_5_1() {
@@ -119,7 +119,7 @@ mod unit {
         let s5 = "aaaaaffgghijjjkllllrs";
         let alphabet = get_alphabet(&vec![s1, s2, s3, s4, s5]);
         let res:String = alphabet.into_iter().collect();
-        assert_eq!(res, "abcdefghijklmnopqrs");
+        assert_eq!(res, "abcde");
     }
 
 }

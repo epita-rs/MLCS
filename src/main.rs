@@ -4,9 +4,9 @@ use astar::mlcs_astar;
 
 fn main() {
 
-    let s1 = "gxtxayb";
-    let s2 = "abgtab";
-    let s3 = "gyaytahjb";
+    let s1 = "wowww";
+    let s2 = "ewwww";
+    let s3 = "wwhjhkjkjkww";
     let s = vec![s1, s2, s3];
 
     let S1 = vec!["🤶🤶99🤶🤶🤶7🤶7🤶🤶🤶6ghg",
