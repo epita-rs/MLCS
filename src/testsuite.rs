@@ -192,23 +192,47 @@ mod functionnal {
     #[test]
     fn random_70_1050() {
         let pattern = "jjflijfbbuy773g29000h0hjJHg23eg2jfj2fh2f";
-        let s_string = generate_testcase(&pattern, 70, 350);
+        let s_string = generate_testcase(&pattern, 70, 1050);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
         assert_eq!(mlcs_astar(&s, s.len()), pattern);
     }
     #[test]
-    fn random_70_5050() {
+    fn random_30_5050() {
         let pattern = "jjflijfbbuy773g29000h0hjJHg23eg2jfj2fh2f";
-        let s_string = generate_testcase(&pattern, 70, 350);
+        let s_string = generate_testcase(&pattern, 30, 5050);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
         assert_eq!(mlcs_astar(&s, s.len()), pattern);
     }
     #[test]
-    fn random_70_10050() {
+    fn random_20_10050() {
         let pattern = "jjflijfbbuy773g29000h0hjJHg23eg2jfj2fh2f";
-        let s_string = generate_testcase(&pattern, 70, 350);
+        let s_string = generate_testcase(&pattern, 20, 10050);
+        // Line below is a basic cast from Vec<String> to Vec<&str>
+        let s = s_string.iter().map(|x| x.as_str()).collect();
+        assert_eq!(mlcs_astar(&s, s.len()), pattern);
+    }
+    #[test]
+    fn random_20_50050() {
+        let pattern = "fbbuy773g29000h0hjJHg23eg2jfj2fh2f";
+        let s_string = generate_testcase(&pattern, 20, 50050);
+        // Line below is a basic cast from Vec<String> to Vec<&str>
+        let s = s_string.iter().map(|x| x.as_str()).collect();
+        assert_eq!(mlcs_astar(&s, s.len()), pattern);
+    }
+    #[test]
+    fn random_20_500050() {
+        let pattern = "goulou";
+        let s_string = generate_testcase(&pattern, 20, 500050);
+        // Line below is a basic cast from Vec<String> to Vec<&str>
+        let s = s_string.iter().map(|x| x.as_str()).collect();
+        assert_eq!(mlcs_astar(&s, s.len()), pattern);
+    }
+    #[test]
+    fn random_20_2_000_050() {
+        let pattern = "goulou_)(*&098765";
+        let s_string = generate_testcase(&pattern, 20, 2_000_050);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
         assert_eq!(mlcs_astar(&s, s.len()), pattern);

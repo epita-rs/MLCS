@@ -1,7 +1,8 @@
 use std::cmp::Ordering;
 use std::collections::HashMap;
-use std::collections::HashSet;
+use std::collections::BinaryHeap;
 use std::cmp::max;
+use std::cmp::Reverse;
 use std::rc::Rc;
 
 const IMPOSSIBLE_NB:usize = 999_999_999_999;
@@ -201,15 +202,6 @@ pub fn get_starting_p(infos: &Infos, S: &Vec<&str>) -> Vec<Vec<usize>>
     successors
 }
 
-// given the list of strings, finds their common alphabet
-pub fn get_common_alphabet(S : &Vec<Vec<char>>) -> Vec<char>
-{
-    // TODO get first line, collect the rest as hashmaps
-    //let mut alphabet:HashMap<char, bool> = S[-1];
-
-    vec![]
-}
-
 // saves all the infos needed to perform the algo in one place
 pub struct Infos {
          alphabet : Vec<char>,
@@ -220,6 +212,7 @@ pub struct Infos {
          f : HashMap<Vec<usize>, u64>,
          d : usize
 }
+
 impl Infos {
     // basic preprocessing
     pub fn new(S : &Vec<&str>, d : usize) -> Self
@@ -274,12 +267,12 @@ fn reorder_queue(Q: &mut Vec<Vec<usize>>, i: &mut Infos)
 {
     Q.sort_unstable_by(|p, q| {
             if (i.f.get(p) > i.f.get(q)) || (i.f.get(p) == i.f.get(q) 
-                   && h(&i.MS, p, i.d) > h(&i.MS, q, i.d)) {
-                    Ordering::Greater
+                    && h(&i.MS, p, i.d) > h(&i.MS, q, i.d)) {
+            Ordering::Greater
             }
             else {
-                Ordering::Less
-            }
+            Ordering::Less
+            }   
   });
 }
 
@@ -309,6 +302,42 @@ fn common_seq(i :&Infos, p: &Vec<usize>, S: &Vec<&str>) -> String
     s.iter().rev().collect::<String>()
 }
 
+#[derive(PartialEq, Eq, Debug)]
+struct PointWrapper {
+        p:Rc<Vec<usize>>,
+        fv:u64,
+        hv:u64
+}
+
+impl PointWrapper {
+    pub fn new(infos : &Infos, p : &Vec<usize>) -> Self
+    {
+        let fv = *infos.f.get(p).unwrap();
+        let hv = h(&infos.MS, p, infos.d);
+        let p = Rc::new(p.clone());
+
+        PointWrapper { p, fv, hv }
+    }
+}
+
+impl PartialOrd for PointWrapper {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for PointWrapper {
+    fn cmp(&self, other:&Self) -> Ordering {
+        if (self.fv > other.fv) || (self.fv == other.fv
+                   && self.hv > other.hv) {
+                Ordering::Greater
+            }
+            else {
+                Ordering::Less
+            }
+    }
+}
+
 // We make S to be a ref to Vec instead of a ref 
 // to Array due to the possible unknown size of S.
 pub fn mlcs_astar(S : &Vec<&str>, d : usize) -> String {
@@ -317,7 +346,7 @@ pub fn mlcs_astar(S : &Vec<&str>, d : usize) -> String {
     let mut infos = Infos::new(S, d);
 
     // Queue
-    //let mut Q:BinaryHeap<Reverse<Vec<usize>>>;
+    //let mut Qb:BinaryHeap<Reverse<PointWrapper>>;
     let mut Q:Vec<Vec<usize>> = vec![];
     init_queue(&mut Q, S, d, &mut infos);
 
