@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::collections::BinaryHeap;
 use std::cmp::max;
 use std::cmp::Reverse;
@@ -240,14 +241,19 @@ impl Infos {
 
 // runs the successor a first time
 // this could be avoided
-fn init_queue(Q: &mut Vec<Vec<usize>>, S: &Vec<&str>, d:usize, infos:&mut Infos)
+fn init_queue(Q: &mut BinaryHeap<PointWrapper>, S: &Vec<&str>, infos:&mut Infos,
+              hset: &mut HashSet<Vec<usize>>)
 {
-    *Q = get_starting_p(&infos, &S);
+    let init_points:Vec<Vec<usize>> = get_starting_p(&infos, &S);
 
-    for q in Q.clone() {
-        update_suc(vec![IMPOSSIBLE_NB; d], q.clone(), infos);
+    for q in init_points.clone() {
+
+        update_suc(vec![IMPOSSIBLE_NB; infos.d], q.clone(), infos);
+        hset.insert(q.clone());
+
+        let pw = PointWrapper::new(infos, &q);
+        (*Q).push(pw);
     }
-    reorder_queue(Q, infos);
 }
 
 // given a point p and his successor q, computes necessary informations
@@ -302,9 +308,9 @@ fn common_seq(i :&Infos, p: &Vec<usize>, S: &Vec<&str>) -> String
     s.iter().rev().collect::<String>()
 }
 
-#[derive(PartialEq, Eq, Debug)]
+#[derive(PartialEq, Eq, Clone, Debug)]
 struct PointWrapper {
-        p:Rc<Vec<usize>>,
+        p:Vec<usize>,
         fv:u64,
         hv:u64
 }
@@ -314,7 +320,7 @@ impl PointWrapper {
     {
         let fv = *infos.f.get(p).unwrap();
         let hv = h(&infos.MS, p, infos.d);
-        let p = Rc::new(p.clone());
+        let p = p.clone();
 
         PointWrapper { p, fv, hv }
     }
@@ -326,15 +332,17 @@ impl PartialOrd for PointWrapper {
     }
 }
 
+// Ordering is reversed because Rust Binary Heap is a max heap
+// and we want a min heap
 impl Ord for PointWrapper {
     fn cmp(&self, other:&Self) -> Ordering {
         if (self.fv > other.fv) || (self.fv == other.fv
-                   && self.hv > other.hv) {
-                Ordering::Greater
-            }
-            else {
-                Ordering::Less
-            }
+                && self.hv > other.hv) {
+            Ordering::Greater
+        }
+        else {
+            Ordering::Less
+        }
     }
 }
 
@@ -346,15 +354,17 @@ pub fn mlcs_astar(S : &Vec<&str>, d : usize) -> String {
     let mut infos = Infos::new(S, d);
 
     // Queue
-    //let mut Qb:BinaryHeap<Reverse<PointWrapper>>;
-    let mut Q:Vec<Vec<usize>> = vec![];
-    init_queue(&mut Q, S, d, &mut infos);
+    let mut Q:BinaryHeap<PointWrapper> = Default::default();
+    let mut hset:HashSet<Vec<usize>> = Default::default();
+    init_queue(&mut Q, S, &mut infos, &mut hset);
 
     while Q.len() > 0 {
 
-        let p:Vec<usize> = Q.pop().unwrap().clone();
+        let pw:PointWrapper = Q.pop().unwrap();
+        let p:Vec<usize> = pw.p;
+        hset.remove(&p);
 
-        if h(&infos.MS, &p, d) == 0 {
+        if h(&infos.MS, &p, infos.d) == 0 {
             // An MLCS match was found
             return common_seq(&infos, &p, S);
         }
@@ -366,14 +376,13 @@ pub fn mlcs_astar(S : &Vec<&str>, d : usize) -> String {
                 // basically saying if the queue Q does not already 
                 // contain the point q
                 update_suc(p.clone(), q.clone(), &mut infos);
-                if !Q.contains(&q) {
-                    Q.push(q);
+                if !hset.contains(&q) {
+                    hset.insert(q.clone());
+                    let pw = PointWrapper::new(&infos, &q);
+                    Q.push(pw);
                 }
             }
-
-            reorder_queue(&mut Q, &mut infos);
         }
-
     }
     return String::from("");
 }
