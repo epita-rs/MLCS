@@ -5,6 +5,7 @@ use std::collections::BinaryHeap;
 use std::cmp::max;
 use std::cmp::Reverse;
 use std::rc::Rc;
+use rayon::prelude::*;
 
 const IMPOSSIBLE_NB:usize = 999_999_999_999;
 
