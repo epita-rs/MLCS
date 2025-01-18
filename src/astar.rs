@@ -1,6 +1,7 @@
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::cmp::max;
+use rayon::prelude::*;
 
 const IMPOSSIBLE_NB:usize = 999_999_999_999;
 
@@ -16,7 +17,7 @@ const IMPOSSIBLE_NB:usize = 999_999_999_999;
 fn MT_table(S:&Vec<&str>, alphabet: &mut Vec<char>)
        -> Vec<Vec<Vec<usize>>>
 {
-    let sc:Vec<Vec<char>> = S.iter().map(|s| s.chars().collect()).collect();
+    let sc:Vec<Vec<char>> = S.par_iter().map(|s| s.chars().collect()).collect();
 
     let mut MT:Vec<Vec<Vec<usize>>> = vec![];
 
@@ -71,19 +72,19 @@ fn h(M:&Vec<Vec<Vec<u64>>>, p:&Vec<usize> , d: usize) -> u64
         }
     }
 
-    *similarity.iter().min().unwrap()
+    *similarity.par_iter().min().unwrap()
 }
 
 // gets the successors of a specific point
 pub fn get_successors(infos: &Infos, S : &Vec<&str>, p: &Vec<usize>) 
     -> Vec<Vec<usize>>
 {
-    // OPTI : we may be passing the alphabet param directly as an iterator
+    // OPTI : we may be passing the alphabet param directly as an.par_iterator
     let mut successors:Vec<Vec<usize>> = vec![];
     let mut ch_idx:usize = 0;
 
     // for all alphabet letters
-    for ch in infos.alphabet.iter()
+    for ch in infos.alphabet.clone()
     {
         // for each string, finds the next position of that letter
         let mut succ:Vec<usize> = vec![]; 
@@ -137,14 +138,11 @@ pub fn score_matrix(s1: &str, s2: &str) -> Vec<Vec<u64>>
 // given the list of strings we compute the set of score matrices
 pub fn matrices_score(S : &Vec<&str>) -> Vec<Vec<Vec<u64>>>
 {
-    let mut scores: Vec<Vec<Vec<u64>>> = vec![];
-    for s1 in S.iter() {
-        for s2 in S.iter() {
-            scores.push(score_matrix(s1, s2));
-        }
-    }
-
-    scores
+    S.par_iter()
+        .flat_map(|s1| {
+                S.par_iter().map(move |s2| score_matrix(s1, s2))
+                })
+    .collect()
 }
 
 // given the list of strings, finds the minimal alphabet
@@ -154,7 +152,7 @@ pub fn get_alphabet(S : &Vec<&str>) -> Vec<char>
 {
     // OPTI comment
     // use hashmap to keep track of inserted values
-    let mut alphabet:Vec<char> = S.iter()
+    let mut alphabet:Vec<char> = S.par_iter()
                                   .min_by_key(|s| s.len())
                                   .expect("No minimum found")
                                   .chars()
@@ -168,12 +166,12 @@ pub fn get_alphabet(S : &Vec<&str>) -> Vec<char>
 // gets the first matches 
 pub fn get_starting_p(infos: &Infos, S: &Vec<&str>) -> Vec<Vec<usize>>
 {
-    // OPTI : we may be passing the alphabet param directly as an iterator
+    // OPTI : we may be passing the alphabet param directly as an.par_iterator
     let mut successors:Vec<Vec<usize>> = vec![];
     let mut ch_idx:usize = 0;
 
     // for all alphabet letters
-    for ch in infos.alphabet.iter()
+    for ch in infos.alphabet.clone()
     {
         // for each string, finds the next position of that letter
         let mut succ:Vec<usize> = vec![]; 
@@ -275,10 +273,10 @@ fn reorder_queue(Q: &mut Vec<Vec<usize>>, i: &mut Infos)
 
 fn is_match(P: &Vec<usize>, S: &Vec<&str>) -> bool
 {
-    let v:Vec<char> = S.iter().map(|s| s.chars().nth(0).unwrap()).collect();
+    let v:Vec<char> = S.par_iter().map(|s| s.chars().nth(0).unwrap()).collect();
     let first = v[0];
     
-    v.iter().all(|c| *c == first)
+    v.par_iter().all(|c| *c == first)
 }
 
 // ascend back up the parent tree to form the string
@@ -296,7 +294,7 @@ fn common_seq(i :&Infos, p: &Vec<usize>, S: &Vec<&str>) -> String
         p = &i.parents.get(p).unwrap().as_ref().unwrap(); 
     }
 
-    s.iter().rev().collect::<String>()
+    s.par_iter().rev().collect::<String>()
 }
 
 // We make S to be a ref to Vec instead of a ref 

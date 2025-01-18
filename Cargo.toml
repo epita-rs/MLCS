@@ -15,3 +15,4 @@ path = "src/bench.rs"
 # this depency could be avoided because we are not concerned 
 # with security here, so we could write our light-weight own model
 rand = "0.8"
+rayon = "1.10.0"
