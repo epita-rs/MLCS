@@ -3,8 +3,7 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::collections::BinaryHeap;
 use std::cmp::max;
-use std::cmp::Reverse;
-use std::rc::Rc;
+use std::cell::RefCell;
 use rayon::prelude::*;
 
 const IMPOSSIBLE_NB:usize = 999_999_999_999;
@@ -88,7 +87,7 @@ pub fn get_successors(infos: &Infos, S : &Vec<&str>, p: &Vec<usize>)
     let mut ch_idx:usize = 0;
 
     // for all alphabet letters
-    for ch in infos.alphabet.iter()
+    for _ in infos.alphabet.iter()
     {
         // for each string, finds the next position of that letter
         let mut succ:Vec<usize> = vec![]; 
@@ -178,7 +177,7 @@ pub fn get_starting_p(infos: &Infos, S: &Vec<&str>) -> Vec<Vec<usize>>
     let mut ch_idx:usize = 0;
 
     // for all alphabet letters
-    for ch in infos.alphabet.iter()
+    for _ in infos.alphabet.iter()
     {
         // for each string, finds the next position of that letter
         let mut succ:Vec<usize> = vec![]; 
@@ -242,14 +241,24 @@ impl Infos {
 
 // runs the successor a first time
 // this could be avoided
-fn init_queue(Q: &mut BinaryHeap<PointWrapper>, S: &Vec<&str>, infos:&mut Infos,
+fn init_queue<'a>(Q: &mut BinaryHeap<PointWrapper<'a>>, S: &Vec<&str>, 
+              infos:&'a RefCell<Infos>,
               hset: &mut HashSet<Vec<usize>>)
 {
-    let init_points:Vec<Vec<usize>> = get_starting_p(&infos, &S);
+    let mut init_points:Vec<Vec<usize>>;
+
+    {
+        let i = & *infos.borrow();
+        init_points = get_starting_p(&i, &S);
+    }
+
 
     for q in init_points.clone() {
+        {
+            let i = &mut *infos.borrow_mut();
+            update_suc(vec![IMPOSSIBLE_NB; i.d], q.clone(), i);
+        }
 
-        update_suc(vec![IMPOSSIBLE_NB; infos.d], q.clone(), infos);
         hset.insert(q.clone());
 
         let pw = PointWrapper::new(infos, &q);
@@ -309,41 +318,44 @@ fn common_seq(i :&Infos, p: &Vec<usize>, S: &Vec<&str>) -> String
     s.iter().rev().collect::<String>()
 }
 
-#[derive(PartialEq, Eq, Clone, Debug)]
-struct PointWrapper {
-        p:Vec<usize>,
-        fv:u64,
-        hv:u64
+//#[derive(Ord, Eq, Clone, Debug, PartialEq, PartialOrd)]
+struct PointWrapper<'a> {
+        p: Vec<usize>,
+        infos: &'a RefCell<Infos>,
 }
 
-impl PointWrapper {
-    pub fn new(infos : &Infos, p : &Vec<usize>) -> Self
+impl<'a> PointWrapper<'a> {
+    pub fn new(infos : &'a RefCell<Infos>, p : &Vec<usize>) -> Self
     {
-        let fv = *infos.f.get(p).unwrap();
-        let hv = h(&infos.MS, p, infos.d);
         let p = p.clone();
-
-        PointWrapper { p, fv, hv }
+        PointWrapper { p, infos}
     }
 }
 
-impl PartialOrd for PointWrapper {
+impl<'a> PartialOrd for PointWrapper<'a> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
+impl<'a> PartialEq for PointWrapper<'a> {
+    fn eq(&self, _: &PointWrapper<'a>) -> bool { true }
+}
+impl<'a> Eq for PointWrapper<'a> {}
+
 // Ordering is reversed because Rust Binary Heap is a max heap
 // and we want a min heap
-impl Ord for PointWrapper {
+impl<'a> Ord for PointWrapper<'a> {
     fn cmp(&self, other:&Self) -> Ordering {
-        if (self.fv > other.fv) || (self.fv == other.fv
-                && self.hv > other.hv) {
-            Ordering::Greater
-        }
-        else {
-            Ordering::Less
-        }
+        let i = & *self.infos.borrow();
+         if (i.f.get(&self.p) > i.f.get(&other.p))
+            || (i.f.get(&self.p) == i.f.get(&other.p)
+                 && h(&i.MS, &self.p, i.d) > h(&i.MS, &other.p, i.d)) {
+             Ordering::Greater
+         }
+         else {
+             Ordering::Less
+         }
     }
 }
 
@@ -352,12 +364,13 @@ impl Ord for PointWrapper {
 pub fn mlcs_astar(S : &Vec<&str>, d : usize) -> String {
 
     // Preprocessing
-    let mut infos = Infos::new(S, d);
+    let mut infos = RefCell::new(Infos::new(S, d));
 
     // Queue
     let mut Q:BinaryHeap<PointWrapper> = Default::default();
     let mut hset:HashSet<Vec<usize>> = Default::default();
-    init_queue(&mut Q, S, &mut infos, &mut hset);
+
+    init_queue(&mut Q, S, &infos, &mut hset);
 
     while Q.len() > 0 {
 
@@ -365,18 +378,31 @@ pub fn mlcs_astar(S : &Vec<&str>, d : usize) -> String {
         let p:Vec<usize> = pw.p;
         hset.remove(&p);
 
-        if h(&infos.MS, &p, infos.d) == 0 {
+        let mut hv;
+
+        {
+            let i = &infos.borrow();
+            hv = h(&i.MS, &p, i.d);
+        }
+
+        if hv == 0 {
             // An MLCS match was found
-            return common_seq(&infos, &p, S);
+            return common_seq(& *infos.borrow(), &p, S);
         }
         else
         {
             // inserting all succesors in the queue
-            let succs = get_successors(&infos, &S, &p);
+            let mut succs;
+
+            {
+                succs = get_successors(& *infos.borrow(), &S, &p);
+            }
+
             for q in succs {
+                {
+                    update_suc(p.clone(), q.clone(), &mut * infos.borrow_mut());
+                }
                 // basically saying if the queue Q does not already 
-                // contain the point q
-                update_suc(p.clone(), q.clone(), &mut infos);
                 if !hset.contains(&q) {
                     hset.insert(q.clone());
                     let pw = PointWrapper::new(&infos, &q);
