@@ -1,5 +1,6 @@
 mod utils;
 mod astar;
+mod astar_app;
 mod testsuite;
 use astar::mlcs_astar;
 

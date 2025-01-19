@@ -1,72 +1,53 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 mod utils;
 mod astar;
+mod astar_app;
 mod testsuite;
 use astar::mlcs_astar;
+use astar_app::astar_app;
 use testsuite::generate_testcase;
 
-pub fn easy_1(c: &mut Criterion) {
-    let s1 = "gxtxayb"; 
-    let s2 = "abgtab"; 
-    let s3 = "gyaytahjb"; 
-    let s4 = "gyayjjjtab"; 
-    let s5 = "gyaytahhhhb"; 
-    let s6 = "ygaytppppahjb"; 
-    let s7 = "ylllgaytmmajb"; 
-    let s = vec![s1, s2, s3, s4, s5, s6, s7];
-    c.bench_function("easy 1", |c|
-            c.iter(|| mlcs_astar(black_box(&s), black_box(7))));
-}
+pub fn random(c: &mut Criterion, f: fn(&Vec<&str>, usize) -> String,
+              infos:Vec<usize>) {
 
-pub fn easy_random_1(c: &mut Criterion) {
-    let pattern = "mouahahahahahahahihihihhohohoho";
-    let s_string = generate_testcase(&pattern, 10, 40);
-    // Line below is a basic cast from Vec<String> to Vec<&str>
-    let s = s_string.iter().map(|x| x.as_str()).collect();
-    c.bench_function("easy_random_1", |c|
-            c.iter(|| mlcs_astar(black_box(&s), black_box(s.len()))));
-}
-
-pub fn medium_random_1(c: &mut Criterion) {
-    let pattern = "dkjsdsbbhhvVGVGVUVJvhjvjfsdkhfihsfugvdqwv";
-    let s_string = generate_testcase(&pattern, 20, 20);
-    // Line below is a basic cast from Vec<String> to Vec<&str>
-    let s = s_string.iter().map(|x| x.as_str()).collect();
-    c.bench_function("easy_random_20_20", |c|
-            c.iter(|| mlcs_astar(black_box(&s), black_box(s.len()))));
-}
-
-pub fn medium_random_2(c: &mut Criterion) {
-    let pattern = "dkjsdsbbhhvVGVGVUVJvhjvjfsdkhfihsfugvdqw098763787658927v";
-    let s_string = generate_testcase(&pattern, 3, 80);
-    // Line below is a basic cast from Vec<String> to Vec<&str>
-    let s = s_string.iter().map(|x| x.as_str()).collect();
-    c.bench_function("easy_random_3_80", |c|
-            c.iter(|| mlcs_astar(black_box(&s), black_box(s.len()))));
-}
-
-pub fn medium_random_3(c: &mut Criterion) {
     let pattern = "09876_c-DGK(*&^";
-    let s_string = generate_testcase(&pattern, 50, 20);
-    // Line below is a basic cast from Vec<String> to Vec<&str>
+    let nb_string= infos[0];
+    let string_length= infos[1];
+
+    let s_string = generate_testcase(&pattern, nb_string, string_length);
+
+    // cast from Vec<String> to Vec<&str>
     let s = s_string.iter().map(|x| x.as_str()).collect();
-    c.bench_function("easy_random_80_30", |c|
-            c.iter(|| mlcs_astar(black_box(&s), black_box(s.len()))));
+
+    let description = format!(
+               "benchmark random inputs. (string nb, length) = ({}, {})",
+               nb_string,
+               string_length);
+
+    c.bench_function(
+        &description, 
+        |c| c.iter(|| f(black_box(&s), black_box(s.len())))
+    );
 }
 
-pub fn easy(c: &mut Criterion) {
-    easy_1(c);
-    easy_random_1(c);
+pub fn medium(c: &mut Criterion, f: fn(&Vec<&str>, usize) -> String) {
+    random(c, f, vec![10, 10]);
+    random(c, f, vec![10, 40]);
+    random(c, f, vec![20, 40]);
+    random(c, f, vec![5, 50]);
 }
 
-pub fn medium(c: &mut Criterion) {
-    medium_random_1(c);
-    medium_random_2(c);
+pub fn medium_astar_app(c: &mut Criterion) {
+    medium(c, astar_app);
 }
 
-criterion_group!(benches,
-                easy_1,
-                easy_random_1, 
-                medium_random_2, 
-                medium_random_3);
-criterion_main!(benches);
+pub fn medium_astar(c: &mut Criterion) {
+    medium(c, mlcs_astar);
+}
+criterion_group!(astar_app_bench,
+                 medium_astar_app);
+
+criterion_group!(astar_bench,
+                medium_astar);
+
+criterion_main!(astar_app_bench, astar_bench);

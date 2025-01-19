@@ -74,6 +74,18 @@ pub fn h(M:&Vec<Vec<Vec<u64>>>, p:&Vec<usize> , d: usize) -> u64
     *similarity.iter().min().unwrap()
 }
 
+// retreives the value of f(p)
+pub fn f(infos: &Infos, p:&Vec<usize>) -> u64
+{
+    infos.f.get(p).unwrap().clone()
+}
+
+// retreives the value of g(p)
+pub fn g(infos: &Infos, p:&Vec<usize>) -> u64
+{
+    infos.g.get(p).unwrap().clone()
+}
+
 // gets the successors of a specific point
 pub fn get_successors(infos: &Infos, S : &Vec<&str>, p: &Vec<usize>) 
     -> Vec<Vec<usize>>
@@ -83,7 +95,7 @@ pub fn get_successors(infos: &Infos, S : &Vec<&str>, p: &Vec<usize>)
     let mut ch_idx:usize = 0;
 
     // for all alphabet letters
-    for ch in infos.alphabet.iter()
+    for _ in infos.alphabet.iter()
     {
         // for each string, finds the next position of that letter
         let mut succ:Vec<usize> = vec![]; 
@@ -173,7 +185,7 @@ pub fn get_starting_p(infos: &Infos, S: &Vec<&str>) -> Vec<Vec<usize>>
     let mut ch_idx:usize = 0;
 
     // for all alphabet letters
-    for ch in infos.alphabet.iter()
+    for _ in infos.alphabet.iter()
     {
         // for each string, finds the next position of that letter
         let mut succ:Vec<usize> = vec![]; 
@@ -205,7 +217,7 @@ pub struct Infos {
          parents : HashMap<Vec<usize>, Option<Vec<usize>>>,
          pub MS : Vec<Vec<Vec<u64>>>,
          MT : Vec<Vec<Vec<usize>>>,
-         g : HashMap<Vec<usize>, u64>,
+         pub g : HashMap<Vec<usize>, u64>,
          f : HashMap<Vec<usize>, u64>,
          d : usize
 }
@@ -273,7 +285,7 @@ pub fn reorder_queue(Q: &mut Vec<Vec<usize>>, i: &mut Infos)
   });
 }
 
-fn is_match(P: &Vec<usize>, S: &Vec<&str>) -> bool
+fn is_match(_P: &Vec<usize>, S: &Vec<&str>) -> bool
 {
     let v:Vec<char> = S.iter().map(|s| s.chars().nth(0).unwrap()).collect();
     let first = v[0];
