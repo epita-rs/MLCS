@@ -19,7 +19,7 @@ fn main() {
               "Q9Q9QQ7Q76QQQghQg",
               "术术99术7术7术术6术术g术hg"];
     
-    let res = mlcs_astar(&s, s.len());
+    let res = mlcs_astar(&s);
     
     println!("{}", res);
 }

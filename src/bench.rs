@@ -7,7 +7,7 @@ use astar::mlcs_astar;
 use astar_app::astar_app;
 use testsuite::generate_testcase;
 
-pub fn random(c: &mut Criterion, f: fn(&Vec<&str>, usize) -> String,
+pub fn random(c: &mut Criterion, f: fn(&Vec<&str>) -> String,
               infos:Vec<usize>) {
 
     let pattern = "09876_c-DGK(*&^";
@@ -26,17 +26,17 @@ pub fn random(c: &mut Criterion, f: fn(&Vec<&str>, usize) -> String,
 
     c.bench_function(
         &description, 
-        |c| c.iter(|| f(black_box(&s), black_box(s.len())))
+        |c| c.iter(|| f(black_box(&s)))
     );
 }
 
-pub fn medium(c: &mut Criterion, f: fn(&Vec<&str>, usize) -> String) {
+pub fn medium(c: &mut Criterion, f: fn(&Vec<&str>) -> String) {
     random(c, f, vec![10, 10]);
     random(c, f, vec![10, 40]);
     random(c, f, vec![20, 40]);
     random(c, f, vec![5, 50]);
 }
-pub fn hard(c: &mut Criterion, f: fn(&Vec<&str>, usize) -> String) {
+pub fn hard(c: &mut Criterion, f: fn(&Vec<&str>) -> String) {
     random(c, f, vec![50, 50]);
     random(c, f, vec![5, 80]);
 }

@@ -3,11 +3,21 @@ use crate::utils::*;
 const k:usize = 2000;
 const c:u64 = 20;
 
-// We make S to be a ref to Vec instead of a ref 
-// to Array due to the possible unknown size of S.
-pub fn astar_app(S : &Vec<&str>, d : usize) -> String {
+/// Outputs the Longest Common Subsequence among Multiple strings (MLCS)
+///
+/// # Arguments
+///
+/// * `S` - Array of strings.
+///
+/// # Returns
+///
+/// * `String` if the strings are not anagrams.
+/// * `String::new("")' if no MLCS was found
+pub fn astar_app(S : &Vec<&str>) -> String {
 
     // Preprocessing
+    let d = S.len();
+
     let mut infos = Infos::new(S, d);
 
     // Queue

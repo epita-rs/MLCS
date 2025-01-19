@@ -135,7 +135,7 @@ mod functionnal {
         let s_string = generate_testcase(&pattern, 7, 30);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(mlcs_astar(&s, s.len()), pattern);
+        assert_eq!(mlcs_astar(&s), pattern);
     }
 
     #[test]
@@ -144,7 +144,7 @@ mod functionnal {
         let s_string = generate_testcase(&pattern, 7, 30);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(mlcs_astar(&s, s.len()), pattern);
+        assert_eq!(mlcs_astar(&s), pattern);
     }
 
     #[test]
@@ -153,7 +153,7 @@ mod functionnal {
         let s_string = generate_testcase(&pattern, 7, 30);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(mlcs_astar(&s, s.len()), pattern);
+        assert_eq!(mlcs_astar(&s), pattern);
     }
 
     #[test]
@@ -162,7 +162,7 @@ mod functionnal {
         let s_string = generate_testcase(&pattern, 7, 30);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(mlcs_astar(&s, s.len()), pattern);
+        assert_eq!(mlcs_astar(&s), pattern);
     }
     
     #[test]
@@ -171,7 +171,7 @@ mod functionnal {
         let s_string = generate_testcase(&pattern, 10, 40);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(mlcs_astar(&s, s.len()), pattern);
+        assert_eq!(mlcs_astar(&s), pattern);
     }
 
     #[test]
@@ -180,7 +180,7 @@ mod functionnal {
         let s_string = generate_testcase(&pattern, 60, 60);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(mlcs_astar(&s, s.len()), pattern);
+        assert_eq!(mlcs_astar(&s), pattern);
     }
     #[test]
     fn random_70_350() {
@@ -188,7 +188,7 @@ mod functionnal {
         let s_string = generate_testcase(&pattern, 70, 350);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(mlcs_astar(&s, s.len()), pattern);
+        assert_eq!(mlcs_astar(&s), pattern);
     }
     #[test]
     fn random_70_1050() {
@@ -196,7 +196,7 @@ mod functionnal {
         let s_string = generate_testcase(&pattern, 70, 1050);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(mlcs_astar(&s, s.len()), pattern);
+        assert_eq!(mlcs_astar(&s), pattern);
     }
     #[test]
     fn random_30_5050() {
@@ -204,7 +204,7 @@ mod functionnal {
         let s_string = generate_testcase(&pattern, 30, 5050);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(mlcs_astar(&s, s.len()), pattern);
+        assert_eq!(mlcs_astar(&s), pattern);
     }
     #[test]
     fn random_20_10050() {
@@ -212,7 +212,7 @@ mod functionnal {
         let s_string = generate_testcase(&pattern, 20, 10050);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(mlcs_astar(&s, s.len()), pattern);
+        assert_eq!(mlcs_astar(&s), pattern);
     }
     #[test]
     fn random_20_50050() {
@@ -220,7 +220,7 @@ mod functionnal {
         let s_string = generate_testcase(&pattern, 20, 50050);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(mlcs_astar(&s, s.len()), pattern);
+        assert_eq!(mlcs_astar(&s), pattern);
     }
     #[test]
     fn random_20_500050() {
@@ -228,7 +228,7 @@ mod functionnal {
         let s_string = generate_testcase(&pattern, 20, 500050);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(mlcs_astar(&s, s.len()), pattern);
+        assert_eq!(mlcs_astar(&s), pattern);
     }
     #[test]
     fn random_20_2_000_050() {
@@ -236,7 +236,7 @@ mod functionnal {
         let s_string = generate_testcase(&pattern, 20, 2_000_050);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(mlcs_astar(&s, s.len()), pattern);
+        assert_eq!(mlcs_astar(&s), pattern);
     }
     #[test]
     fn basic_3_1() {
@@ -244,7 +244,7 @@ mod functionnal {
         let s2 = "ewwww"; 
         let s3 = "wwhjhkjkjkww"; 
         let s = vec![s1, s2, s3];
-        assert_eq!(mlcs_astar(&s, 3), "wwww");
+        assert_eq!(mlcs_astar(&s), "wwww");
     }
     #[test]
     fn basic_3_2() {
@@ -252,7 +252,7 @@ mod functionnal {
         let s2 = "abgtab"; 
         let s3 = "gyaytahjb"; 
         let s = vec![s1, s2, s3];
-        assert_eq!(mlcs_astar(&s, 3), "gtab");
+        assert_eq!(mlcs_astar(&s), "gtab");
     }
     #[test]
     fn basic_3_3() {
@@ -260,7 +260,7 @@ mod functionnal {
         let s2 = "Hello world !";
         let s3 = "Hi world!";
         let s = vec![s1, s2, s3];
-        assert_eq!(mlcs_astar(&s, 3), "H world");
+        assert_eq!(mlcs_astar(&s), "H world");
     }
     #[test]
     fn basic_7_1() {
@@ -272,7 +272,7 @@ mod functionnal {
         let s6 = "ygaytppppahjb"; 
         let s7 = "ylllgaytmmajb"; 
         let s = vec![s1, s2, s3, s4, s5, s6, s7];
-        assert_eq!(mlcs_astar(&s, 7), "gtab");
+        assert_eq!(mlcs_astar(&s), "gtab");
     }
     #[test]
     fn basic_7_2() {
@@ -284,7 +284,7 @@ mod functionnal {
         let s6 = "ygaytp#pppahjb"; 
         let s7 = "ylllgaytm#####majb"; 
         let s = vec![s1, s2, s3, s4, s5, s6, s7];
-        assert_eq!(mlcs_astar(&s, 7), "gt#ab");
+        assert_eq!(mlcs_astar(&s), "gt#ab");
     }
     #[test]
     fn medium_12_1() {
@@ -301,7 +301,7 @@ mod functionnal {
         let s11 = "yll5lg25533ayedshtmlmjjaljb"; 
         let s12 = "ylll2ga2ytj345kmmajb"; 
         let s = vec![s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12];
-        assert_eq!(mlcs_astar(&s, s.len()), "gtab");
+        assert_eq!(mlcs_astar(&s), "gtab");
     }
     #[test]
     fn medium_12_2() {
@@ -318,7 +318,7 @@ mod functionnal {
         let s11 = "yll5lg25533ayedshtmlmjjaljb0.0.0.0.0.0..0-"; 
         let s12 = "ylll2ga2ytj345kmmajb000-"; 
         let s = vec![s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12];
-        assert_eq!(mlcs_astar(&s, s.len()), "gtab000-");
+        assert_eq!(mlcs_astar(&s), "gtab000-");
     }
     #[test]
     fn same_3_1() {
@@ -326,7 +326,7 @@ mod functionnal {
         let s2 = "gtab"; 
         let s3 = "gtab"; 
         let s = vec![s1, s2, s3];
-        assert_eq!(mlcs_astar(&s, 3), "gtab");
+        assert_eq!(mlcs_astar(&s), "gtab");
     }
     #[test]
     fn same_4_1() {
@@ -335,7 +335,7 @@ mod functionnal {
         let s3 = "Helllo";
         let s4 = "Helllo";
         let s = vec![s1, s2, s3, s4];
-        assert_eq!(mlcs_astar(&s, s.len()), "Helllo");
+        assert_eq!(mlcs_astar(&s), "Helllo");
     }
     #[test]
     fn no_match_4_1() {
@@ -344,7 +344,7 @@ mod functionnal {
         let s3 = "GGGGGGG";
         let s4 = "PRRRRRRRRRRR";
         let s = vec![s1, s2, s3, s4];
-        assert_eq!(mlcs_astar(&s, s.len()), "");
+        assert_eq!(mlcs_astar(&s), "");
     }
     #[test]
     fn no_match_4_2() {
@@ -353,7 +353,7 @@ mod functionnal {
         let s3 = "0987654567898765";
         let s4 = ")(*&^&*()(*&^";
         let s = vec![s1, s2, s3, s4];
-        assert_eq!(mlcs_astar(&s, s.len()), "");
+        assert_eq!(mlcs_astar(&s), "");
     }
 }
 #[cfg(test)]
@@ -366,7 +366,7 @@ mod astar_app {
         let s_string = generate_testcase(&pattern, 7, 30);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(astar_app(&s, s.len()), pattern);
+        assert_eq!(astar_app(&s), pattern);
     }
 
     #[test]
@@ -375,7 +375,7 @@ mod astar_app {
         let s_string = generate_testcase(&pattern, 7, 30);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(astar_app(&s, s.len()), pattern);
+        assert_eq!(astar_app(&s), pattern);
     }
 
     #[test]
@@ -384,7 +384,7 @@ mod astar_app {
         let s_string = generate_testcase(&pattern, 7, 30);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(astar_app(&s, s.len()), pattern);
+        assert_eq!(astar_app(&s), pattern);
     }
 
     #[test]
@@ -393,7 +393,7 @@ mod astar_app {
         let s_string = generate_testcase(&pattern, 7, 30);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(astar_app(&s, s.len()), pattern);
+        assert_eq!(astar_app(&s), pattern);
     }
     
     #[test]
@@ -403,7 +403,7 @@ mod astar_app {
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
         println!("{:?}", s);
-        assert_eq!(astar_app(&s, s.len()), pattern);
+        assert_eq!(astar_app(&s), pattern);
     }
 
     #[test]
@@ -412,7 +412,7 @@ mod astar_app {
         let s_string = generate_testcase(&pattern, 60, 60);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(astar_app(&s, s.len()), pattern);
+        assert_eq!(astar_app(&s), pattern);
     }
     #[test]
     fn random_70_350() {
@@ -420,7 +420,7 @@ mod astar_app {
         let s_string = generate_testcase(&pattern, 70, 350);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(astar_app(&s, s.len()), pattern);
+        assert_eq!(astar_app(&s), pattern);
     }
     #[test]
     fn random_70_1050() {
@@ -428,7 +428,7 @@ mod astar_app {
         let s_string = generate_testcase(&pattern, 70, 1050);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(astar_app(&s, s.len()), pattern);
+        assert_eq!(astar_app(&s), pattern);
     }
     #[test]
     fn random_30_5050() {
@@ -436,7 +436,7 @@ mod astar_app {
         let s_string = generate_testcase(&pattern, 30, 5050);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(astar_app(&s, s.len()), pattern);
+        assert_eq!(astar_app(&s), pattern);
     }
     #[test]
     fn random_20_10050() {
@@ -444,7 +444,7 @@ mod astar_app {
         let s_string = generate_testcase(&pattern, 20, 10050);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(astar_app(&s, s.len()), pattern);
+        assert_eq!(astar_app(&s), pattern);
     }
     #[test]
     fn random_20_50050() {
@@ -452,7 +452,7 @@ mod astar_app {
         let s_string = generate_testcase(&pattern, 20, 50050);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(astar_app(&s, s.len()), pattern);
+        assert_eq!(astar_app(&s), pattern);
     }
     #[test]
     fn random_20_500050() {
@@ -460,7 +460,7 @@ mod astar_app {
         let s_string = generate_testcase(&pattern, 20, 500050);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(astar_app(&s, s.len()), pattern);
+        assert_eq!(astar_app(&s), pattern);
     }
     #[test]
     fn random_20_2_000_050() {
@@ -468,7 +468,7 @@ mod astar_app {
         let s_string = generate_testcase(&pattern, 20, 2_000_050);
         // Line below is a basic cast from Vec<String> to Vec<&str>
         let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(astar_app(&s, s.len()), pattern);
+        assert_eq!(astar_app(&s), pattern);
     }
     #[test]
     fn basic_3_1() {
@@ -476,7 +476,7 @@ mod astar_app {
         let s2 = "ewwww"; 
         let s3 = "wwhjhkjkjkww"; 
         let s = vec![s1, s2, s3];
-        assert_eq!(astar_app(&s, 3), "wwww");
+        assert_eq!(astar_app(&s), "wwww");
     }
     #[test]
     fn basic_3_2() {
@@ -484,7 +484,7 @@ mod astar_app {
         let s2 = "abgtab"; 
         let s3 = "gyaytahjb"; 
         let s = vec![s1, s2, s3];
-        assert_eq!(astar_app(&s, 3), "gtab");
+        assert_eq!(astar_app(&s), "gtab");
     }
     #[test]
     fn basic_3_3() {
@@ -492,7 +492,7 @@ mod astar_app {
         let s2 = "Hello world !";
         let s3 = "Hi world!";
         let s = vec![s1, s2, s3];
-        assert_eq!(astar_app(&s, 3), "H world");
+        assert_eq!(astar_app(&s), "H world");
     }
     #[test]
     fn basic_7_1() {
@@ -504,7 +504,7 @@ mod astar_app {
         let s6 = "ygaytppppahjb"; 
         let s7 = "ylllgaytmmajb"; 
         let s = vec![s1, s2, s3, s4, s5, s6, s7];
-        assert_eq!(astar_app(&s, 7), "gtab");
+        assert_eq!(astar_app(&s), "gtab");
     }
     #[test]
     fn basic_7_2() {
@@ -516,7 +516,7 @@ mod astar_app {
         let s6 = "ygaytp#pppahjb"; 
         let s7 = "ylllgaytm#####majb"; 
         let s = vec![s1, s2, s3, s4, s5, s6, s7];
-        assert_eq!(astar_app(&s, 7), "gt#ab");
+        assert_eq!(astar_app(&s), "gt#ab");
     }
     #[test]
     fn medium_12_1() {
@@ -533,7 +533,7 @@ mod astar_app {
         let s11 = "yll5lg25533ayedshtmlmjjaljb"; 
         let s12 = "ylll2ga2ytj345kmmajb"; 
         let s = vec![s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12];
-        assert_eq!(astar_app(&s, s.len()), "gtab");
+        assert_eq!(astar_app(&s), "gtab");
     }
     #[test]
     fn medium_12_2() {
@@ -550,7 +550,7 @@ mod astar_app {
         let s11 = "yll5lg25533ayedshtmlmjjaljb0.0.0.0.0.0..0-"; 
         let s12 = "ylll2ga2ytj345kmmajb000-"; 
         let s = vec![s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12];
-        assert_eq!(astar_app(&s, s.len()), "gtab000-");
+        assert_eq!(astar_app(&s), "gtab000-");
     }
     #[test]
     fn same_3_1() {
@@ -558,7 +558,7 @@ mod astar_app {
         let s2 = "gtab"; 
         let s3 = "gtab"; 
         let s = vec![s1, s2, s3];
-        assert_eq!(astar_app(&s, 3), "gtab");
+        assert_eq!(astar_app(&s), "gtab");
     }
     #[test]
     fn same_4_1() {
@@ -567,7 +567,7 @@ mod astar_app {
         let s3 = "Helllo";
         let s4 = "Helllo";
         let s = vec![s1, s2, s3, s4];
-        assert_eq!(astar_app(&s, s.len()), "Helllo");
+        assert_eq!(astar_app(&s), "Helllo");
     }
     #[test]
     fn no_match_4_1() {
@@ -576,7 +576,7 @@ mod astar_app {
         let s3 = "GGGGGGG";
         let s4 = "PRRRRRRRRRRR";
         let s = vec![s1, s2, s3, s4];
-        assert_eq!(astar_app(&s, s.len()), "");
+        assert_eq!(astar_app(&s), "");
     }
     #[test]
     fn no_match_4_2() {
@@ -585,6 +585,6 @@ mod astar_app {
         let s3 = "0987654567898765";
         let s4 = ")(*&^&*()(*&^";
         let s = vec![s1, s2, s3, s4];
-        assert_eq!(astar_app(&s, s.len()), "");
+        assert_eq!(astar_app(&s), "");
     }
 }
