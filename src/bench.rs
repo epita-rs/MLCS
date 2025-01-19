@@ -36,18 +36,23 @@ pub fn medium(c: &mut Criterion, f: fn(&Vec<&str>, usize) -> String) {
     random(c, f, vec![20, 40]);
     random(c, f, vec![5, 50]);
 }
-
-pub fn medium_astar_app(c: &mut Criterion) {
+pub fn hard(c: &mut Criterion, f: fn(&Vec<&str>, usize) -> String) {
+    random(c, f, vec![50, 50]);
+    random(c, f, vec![5, 80]);
+}
+pub fn complete_astar_app(c: &mut Criterion) {
     medium(c, astar_app);
+    hard(c, astar_app);
 }
 
-pub fn medium_astar(c: &mut Criterion) {
+pub fn complete_astar(c: &mut Criterion) {
     medium(c, mlcs_astar);
+    hard(c, mlcs_astar);
 }
 criterion_group!(astar_app_bench,
-                 medium_astar_app);
+                 complete_astar_app);
 
 criterion_group!(astar_bench,
-                medium_astar);
+                complete_astar);
 
 criterion_main!(astar_app_bench, astar_bench);
