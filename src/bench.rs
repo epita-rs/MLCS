@@ -1,7 +1,8 @@
+use criterion::{black_box, criterion_group, criterion_main, Criterion};
+mod utils;
 mod astar;
 mod testsuite;
-use astar::*;
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use astar::mlcs_astar;
 use testsuite::generate_testcase;
 
 pub fn easy_1(c: &mut Criterion) {

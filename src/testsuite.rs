@@ -1,5 +1,5 @@
-use crate::astar;
-use astar::*;
+use crate::astar::mlcs_astar;
+use crate::utils::get_alphabet;
 use rand::{seq::SliceRandom, thread_rng, Rng}; // Random number generator
 
 // @brief : shuffles a string
