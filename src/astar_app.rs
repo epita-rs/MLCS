@@ -1,7 +1,7 @@
 use crate::utils::*;
 
-const k:usize = 2000;
-const c:u64 = 20;
+const k: usize = 2000;
+const c: u64 = 20;
 
 /// Outputs the Longest Common Subsequence among Multiple strings (MLCS)
 ///
@@ -13,19 +13,17 @@ const c:u64 = 20;
 ///
 /// * `String` if the strings are not anagrams.
 /// * `String::new("")' if no MLCS was found
-pub fn astar_app(S : &Vec<&str>) -> String {
-
+pub fn astar_app(S: &Vec<&str>) -> String {
     // Preprocessing
     let d = S.len();
 
     let mut infos = Infos::new(S, d);
 
     // Queue
-    let mut Q:Vec<Vec<usize>> = vec![];
+    let mut Q: Vec<Vec<usize>> = vec![];
     init_queue(&mut Q, S, d, &mut infos);
 
     while Q.len() > 0 {
-
         // y = max( {f(p) | p in Q} )
         let mut y = f(&infos, Q.last().unwrap());
 
@@ -35,29 +33,27 @@ pub fn astar_app(S : &Vec<&str>) -> String {
         }
 
         // R = { p | p in Q and y <= f(p) }
-        let R = Q.clone().into_iter()
-                         .filter(|p| y <= f(&infos, p))
-                         .collect::<Vec<Vec<usize>>>();
+        let R = Q
+            .clone()
+            .into_iter()
+            .filter(|p| y <= f(&infos, p))
+            .collect::<Vec<Vec<usize>>>();
         Q.clear();
 
         for p in R {
             if h(&infos.MS, &p, d) == 0 {
                 // An MLCS match was found
                 return common_seq(&infos, &p, S);
-            }
-            else
-            {
+            } else {
                 // inserting all succesors in the queue
                 let succs = get_successors(&infos, &S, &p);
                 for q in succs {
-                    // basically saying if the queue Q does not already 
+                    // basically saying if the queue Q does not already
                     // contain the point q
                     if !Q.contains(&q) {
                         update_suc(p.clone(), q.clone(), &mut infos);
                         Q.push(q);
-                    }
-                    else if g(&infos, &q) < g(&infos, &p) + 1
-                    {
+                    } else if g(&infos, &q) < g(&infos, &p) + 1 {
                         update_suc(p.clone(), q.clone(), &mut infos);
                     }
                 }

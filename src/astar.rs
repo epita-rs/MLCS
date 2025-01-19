@@ -10,31 +10,27 @@ use crate::utils::*;
 ///
 /// * `String` if the strings are not anagrams.
 /// * `String::new("")' if no MLCS was found
-pub fn mlcs_astar(S : &Vec<&str>) -> String {
-
+pub fn mlcs_astar(S: &Vec<&str>) -> String {
     // Preprocessing
     let d = S.len();
 
     let mut infos = Infos::new(S, d);
 
     // Queue
-    let mut Q:Vec<Vec<usize>> = vec![];
+    let mut Q: Vec<Vec<usize>> = vec![];
     init_queue(&mut Q, S, d, &mut infos);
 
     while Q.len() > 0 {
-
-        let p:Vec<usize> = Q.pop().unwrap().clone();
+        let p: Vec<usize> = Q.pop().unwrap().clone();
 
         if h(&infos.MS, &p, d) == 0 {
             // An MLCS match was found
             return common_seq(&infos, &p, S);
-        }
-        else
-        {
+        } else {
             // inserting all succesors in the queue
             let succs = get_successors(&infos, &S, &p);
             for q in succs {
-                // basically saying if the queue Q does not already 
+                // basically saying if the queue Q does not already
                 // contain the point q
                 update_suc(p.clone(), q.clone(), &mut infos);
                 if !Q.contains(&q) {
@@ -44,7 +40,6 @@ pub fn mlcs_astar(S : &Vec<&str>) -> String {
 
             reorder_queue(&mut Q, &mut infos);
         }
-
     }
     return String::from("");
 }
