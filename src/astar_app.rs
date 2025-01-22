@@ -1,6 +1,6 @@
 use crate::utils::*;
 
-const K: usize = 2000;
+const _K: usize = 2000;
 const C: u64 = 20;
 
 /// Outputs the Longest Common Subsequence among Multiple strings (MLCS)
