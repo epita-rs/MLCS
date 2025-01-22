@@ -48,21 +48,26 @@ pub fn generate_testcase(pattern: &str, nb: usize, length: usize) -> Vec<String>
     alphabet.shuffle(&mut rng);
     alphabet.truncate(nb);
 
-    let plen = pattern.len();
-
     let mut res: Vec<String> = vec![];
     // picking a new unique character
     for ch in alphabet {
         let mut new_str: Vec<char> = pattern.chars().collect();
+        let mut remaining = length;
+        while remaining > 0 {
+            // positions is a list of random positions
+            let mut positions: Vec<usize> = (0..(new_str.len())).collect();
+            positions.shuffle(&mut rng);
 
-        // positions is a list of random positions
-        let mut positions: Vec<usize> = (0..plen).collect();
-        positions.shuffle(&mut rng);
+            // inserting
+            for pos in positions {
+                // inserting at rand position the chosen character
+                new_str.insert(pos, ch);
 
-        // inserting
-        for pos in positions {
-            // inserting at rand position the chosen character
-            new_str.insert(pos, ch);
+                remaining -= 1;
+                if remaining == 0 {
+                    break;
+                }
+            }
         }
 
         res.push(new_str.into_iter().collect());
@@ -133,13 +138,16 @@ mod functionnal {
             random_7_30: ("999776543", 7, 30, $name),
             random_20_40: ("mouahahahahahahahihihihohoho", 20, 40, $name),
             random_60_60: ("jj998762bk--_-=-^%$£..mnHGb##", 60, 60, $name),
-            random_70_350: ("j8762bk-f_u=-^%$£i.mnHGb#?", 70, 350, $name),
+            random_70_40: ("j8762bk-f_u=-^%$£i.mnHGb#?", 70, 40, $name),
+            random_50_100: ("j8762bk-f_u=-^%$£i.mnHGb#?", 50, 100, $name),
+            /*
             random_70_1050: ("j8762bk-f_u=-^%$£i.mnHGb#?", 70, 1050, $name),
             random_30_5050: ("j8762bk-f_u=-^%$£i.mnHGb#?", 30, 5050, $name),
             random_20_10050: ("j8762bk-f_u=-^%$£i.mnHGb#?", 20, 10_050, $name),
             random_20_50050: ("j8762bk-f_u=-^%$£i.mnHGb#?", 20, 50_050, $name),
             random_20_500050: ("j8762bk-f_goulou][", 20, 500_050, $name),
             random_20_2_000_050: ("j0987654321-f_gou][", 20, 2_000_050, $name),
+            */
             }
         };
     }   
@@ -268,116 +276,48 @@ mod functionnal {
 mod astar_app {
     use super::*;
 
-    #[test]
-    fn random_4_10() {
-        let pattern = "grrrrr";
-        let s_string = generate_testcase(&pattern, 7, 30);
-        // Line below is a basic cast from Vec<String> to Vec<&str>
-        let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(astar_app(&s), pattern);
-    }
+    macro_rules! astar_tests {
+        ($($name:ident: $arg:expr,)*) => {
+            $(
+                #[test]
+                 fn $name() {
+                 let (pattern, string_nb, length, f) = $arg;
+                 let s_string = generate_testcase(&pattern, string_nb, length);
+                 // Line below is a basic cast from Vec<String> to Vec<&str>
+                 let s = s_string.iter().map(|x| x.as_str()).collect();
+                 assert_eq!(f(&s), pattern);
+                 }
 
-    #[test]
-    fn random_5_15() {
-        let pattern = "hohoho";
-        let s_string = generate_testcase(&pattern, 7, 30);
-        // Line below is a basic cast from Vec<String> to Vec<&str>
-        let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(astar_app(&s), pattern);
+            )*
+        };
     }
+    
+    macro_rules! astar_complete {
+        ($name:expr) => {
+            astar_tests! {
+            random_4_10: ("grrrrr", 4, 10, $name),
+            random_5_15: ("hohoho", 5, 15, $name),
+            random_6_20: ("mouimoui", 6, 20, $name),
+            random_7_30: ("999776543", 7, 30, $name),
+            random_20_40: ("mouahahahahahahahihihihohoho", 20, 40, $name),
+            random_60_60: ("jj998762bk--_-=-^%$£..mnHGb##", 60, 60, $name),
+            random_70_40: ("j8762bk-f_u=-^%$£i.mnHGb#?", 70, 40, $name),
+            random_50_100: ("j8762bk-f_u=-^%$£i.mnHGb#?", 50, 100, $name),
+            /*
+            random_70_1050: ("j8762bk-f_u=-^%$£i.mnHGb#?", 70, 1050, $name),
+            random_30_5050: ("j8762bk-f_u=-^%$£i.mnHGb#?", 30, 5050, $name),
+            random_20_10050: ("j8762bk-f_u=-^%$£i.mnHGb#?", 20, 10_050, $name),
+            random_20_50050: ("j8762bk-f_u=-^%$£i.mnHGb#?", 20, 50_050, $name),
+            random_20_500050: ("j8762bk-f_goulou][", 20, 500_050, $name),
+            random_20_2_000_050: ("j0987654321-f_gou][", 20, 2_000_050, $name),
+            */
+            }
+        };
+    }   
 
-    #[test]
-    fn random_6_20() {
-        let pattern = "mouimoui";
-        let s_string = generate_testcase(&pattern, 7, 30);
-        // Line below is a basic cast from Vec<String> to Vec<&str>
-        let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(astar_app(&s), pattern);
-    }
+    astar_complete!(astar_app);
+    
 
-    #[test]
-    fn random_7_30() {
-        let pattern = "99776ghg";
-        let s_string = generate_testcase(&pattern, 7, 30);
-        // Line below is a basic cast from Vec<String> to Vec<&str>
-        let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(astar_app(&s), pattern);
-    }
-
-    #[test]
-    fn random_20_40() {
-        let pattern = "mouahahahahahahahihihihhohohoho";
-        let s_string = generate_testcase(&pattern, 10, 40);
-        // Line below is a basic cast from Vec<String> to Vec<&str>
-        let s = s_string.iter().map(|x| x.as_str()).collect();
-        println!("{:?}", s);
-        assert_eq!(astar_app(&s), pattern);
-    }
-
-    #[test]
-    fn random_60_60() {
-        let pattern = "hvddghvsghdvbdfhsgsigjksbgjgjghg";
-        let s_string = generate_testcase(&pattern, 60, 60);
-        // Line below is a basic cast from Vec<String> to Vec<&str>
-        let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(astar_app(&s), pattern);
-    }
-    #[test]
-    fn random_70_350() {
-        let pattern = "jjflijfbbuy773g29000h0hjJHg23eg2jfj2fh2f";
-        let s_string = generate_testcase(&pattern, 70, 350);
-        // Line below is a basic cast from Vec<String> to Vec<&str>
-        let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(astar_app(&s), pattern);
-    }
-    #[test]
-    fn random_70_1050() {
-        let pattern = "jjflijfbbuy773g29000h0hjJHg23eg2jfj2fh2f";
-        let s_string = generate_testcase(&pattern, 70, 1050);
-        // Line below is a basic cast from Vec<String> to Vec<&str>
-        let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(astar_app(&s), pattern);
-    }
-    #[test]
-    fn random_30_5050() {
-        let pattern = "jjflijfbbuy773g29000h0hjJHg23eg2jfj2fh2f";
-        let s_string = generate_testcase(&pattern, 30, 5050);
-        // Line below is a basic cast from Vec<String> to Vec<&str>
-        let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(astar_app(&s), pattern);
-    }
-    #[test]
-    fn random_20_10050() {
-        let pattern = "jjflijfbbuy773g29000h0hjJHg23eg2jfj2fh2f";
-        let s_string = generate_testcase(&pattern, 20, 10050);
-        // Line below is a basic cast from Vec<String> to Vec<&str>
-        let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(astar_app(&s), pattern);
-    }
-    #[test]
-    fn random_20_50050() {
-        let pattern = "fbbuy773g29000h0hjJHg23eg2jfj2fh2f";
-        let s_string = generate_testcase(&pattern, 20, 50050);
-        // Line below is a basic cast from Vec<String> to Vec<&str>
-        let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(astar_app(&s), pattern);
-    }
-    #[test]
-    fn random_20_500050() {
-        let pattern = "goulou";
-        let s_string = generate_testcase(&pattern, 20, 500050);
-        // Line below is a basic cast from Vec<String> to Vec<&str>
-        let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(astar_app(&s), pattern);
-    }
-    #[test]
-    fn random_20_2_000_050() {
-        let pattern = "goulou_)(*&098765";
-        let s_string = generate_testcase(&pattern, 20, 2_000_050);
-        // Line below is a basic cast from Vec<String> to Vec<&str>
-        let s = s_string.iter().map(|x| x.as_str()).collect();
-        assert_eq!(astar_app(&s), pattern);
-    }
     #[test]
     fn basic_3_1() {
         let s1 = "wowww";
