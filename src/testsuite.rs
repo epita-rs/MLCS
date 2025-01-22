@@ -41,11 +41,13 @@ pub fn generate_testcase(pattern: &str, nb: usize, length: usize) -> Vec<String>
     let mut rng = thread_rng();
 
     // building an alphabet free from characters in pattern
-    let mut alphabet: Vec<char> = alphab.chars().filter(|x| !pattern.contains(*x)).collect();
+    let mut alphabet: Vec<char> = alphab
+                                  .chars()
+                                  .filter(|x| !pattern.contains(*x))
+                                  .collect();
     alphabet.shuffle(&mut rng);
     alphabet.truncate(nb);
 
-    let n = alphabet.len();
     let plen = pattern.len();
 
     let mut res: Vec<String> = vec![];

@@ -5,12 +5,8 @@ mod utils;
 use astar::mlcs_astar;
 
 fn main() {
-    let s1 = "wowww";
-    let s2 = "ewwww";
-    let s3 = "wwhjhkjkjkww";
-    let s = vec![s1, s2, s3];
 
-    let S1 = vec![
+    let chains = vec![
         "🤶🤶99🤶🤶🤶7🤶7🤶🤶🤶6ghg",
         "字字9字字字9776字字字ghg字",
         "据据9据据据97据7据据6gh据g",
@@ -20,7 +16,7 @@ fn main() {
         "术术99术7术7术术6术术g术hg",
     ];
 
-    let res = mlcs_astar(&s);
+    let res = mlcs_astar(&chains);
 
     println!("{}", res);
 }
