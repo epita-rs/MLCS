@@ -14,31 +14,30 @@ pub fn mlcs_astar(S: &Vec<&str>) -> String {
     // Preprocessing
     let d = S.len();
 
-    let mut infos = Infos::new(S, d);
+    let mut ctx = Context::new(S, d);
 
-    // Queue
-    let mut Q: Vec<Vec<usize>> = vec![];
-    init_queue(&mut Q, S, d, &mut infos);
+    let mut queue: Vec<Vec<usize>> = vec![];
+    init_queue(&mut queue, S, d, &mut ctx);
 
-    while Q.len() > 0 {
-        let p: Vec<usize> = Q.pop().unwrap().clone();
+    while queue.len() > 0 {
+        let p: Vec<usize> = queue.pop().unwrap().clone();
 
-        if h(&infos.MS, &p, d) == 0 {
+        if heuristic(&ctx.MS, &p, d) == 0 {
             // An MLCS match was found
-            return common_seq(&infos, &p, S);
+            return common_seq(&ctx, &p, S);
         } else {
             // inserting all succesors in the queue
-            let succs = get_successors(&infos, &S, &p);
+            let succs = get_successors(&ctx, &S, &p);
             for q in succs {
-                // basically saying if the queue Q does not already
+                // basically saying if the queue queue does not already
                 // contain the point q
-                update_suc(p.clone(), q.clone(), &mut infos);
-                if !Q.contains(&q) {
-                    Q.push(q);
+                update_suc(p.clone(), q.clone(), &mut ctx);
+                if !queue.contains(&q) {
+                    queue.push(q);
                 }
             }
 
-            reorder_queue(&mut Q, &mut infos);
+            reorder_queue(&mut queue, &mut ctx);
         }
     }
     return String::from("");

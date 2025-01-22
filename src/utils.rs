@@ -56,7 +56,7 @@ fn translate(i: usize, j: usize, d: usize) -> usize {
 }
 
 // given a point, computes the heuristic function
-pub fn h(M: &Vec<Vec<Vec<u64>>>, p: &Vec<usize>, d: usize) -> u64 {
+pub fn heuristic(M: &Vec<Vec<Vec<u64>>>, p: &Vec<usize>, d: usize) -> u64 {
     let mut similarity: Vec<u64> = vec![];
     for i in 0..d {
         for j in 0..d {
@@ -70,27 +70,27 @@ pub fn h(M: &Vec<Vec<Vec<u64>>>, p: &Vec<usize>, d: usize) -> u64 {
 }
 
 // retreives the value of f(p)
-pub fn f(infos: &Infos, p: &Vec<usize>) -> u64 {
-    infos.f.get(p).unwrap().clone()
+pub fn f(ctx: &Context, p: &Vec<usize>) -> u64 {
+    ctx.f.get(p).unwrap().clone()
 }
 
 // retreives the value of g(p)
-pub fn g(infos: &Infos, p: &Vec<usize>) -> u64 {
-    infos.g.get(p).unwrap().clone()
+pub fn g(ctx: &Context, p: &Vec<usize>) -> u64 {
+    ctx.g.get(p).unwrap().clone()
 }
 
 // gets the successors of a specific point
-pub fn get_successors(infos: &Infos, S: &Vec<&str>, p: &Vec<usize>) -> Vec<Vec<usize>> {
+pub fn get_successors(ctx: &Context, S: &Vec<&str>, p: &Vec<usize>) -> Vec<Vec<usize>> {
     // OPTI : we may be passing the alphabet param directly as an iterator
     let mut successors: Vec<Vec<usize>> = vec![];
     let mut ch_idx: usize = 0;
 
     // for all alphabet letters
-    for _ in infos.alphabet.iter() {
+    for _ in ctx.alphabet.iter() {
         // for each string, finds the next position of that letter
         let mut succ: Vec<usize> = vec![];
         for i in 0..(S.len()) {
-            let next_ch_idx = infos.MT[ch_idx][i][p[i] + 1];
+            let next_ch_idx = ctx.MT[ch_idx][i][p[i] + 1];
             if next_ch_idx == IMPOSSIBLE_NB {
                 break;
             }
@@ -163,17 +163,17 @@ pub fn get_alphabet(S: &Vec<&str>) -> Vec<char> {
 }
 
 // gets the first matches
-pub fn get_starting_p(infos: &Infos, S: &Vec<&str>) -> Vec<Vec<usize>> {
+pub fn get_starting_p(ctx: &Context, S: &Vec<&str>) -> Vec<Vec<usize>> {
     // OPTI : we may be passing the alphabet param directly as an iterator
     let mut successors: Vec<Vec<usize>> = vec![];
     let mut ch_idx: usize = 0;
 
     // for all alphabet letters
-    for _ in infos.alphabet.iter() {
+    for _ in ctx.alphabet.iter() {
         // for each string, finds the next position of that letter
         let mut succ: Vec<usize> = vec![];
         for i in 0..(S.len()) {
-            let next_ch_idx = infos.MT[ch_idx][i][0];
+            let next_ch_idx = ctx.MT[ch_idx][i][0];
             if next_ch_idx == IMPOSSIBLE_NB {
                 break;
             }
@@ -191,8 +191,8 @@ pub fn get_starting_p(infos: &Infos, S: &Vec<&str>) -> Vec<Vec<usize>> {
     successors
 }
 
-// saves all the infos needed to perform the algo in one place
-pub struct Infos {
+// saves all the ctx needed to perform the algo in one place
+pub struct Context {
     alphabet: Vec<char>,
     parents: HashMap<Vec<usize>, Option<Vec<usize>>>,
     pub MS: Vec<Vec<Vec<u64>>>,
@@ -202,7 +202,7 @@ pub struct Infos {
     d: usize,
 }
 
-impl Infos {
+impl Context {
     // basic preprocessing
     pub fn new(S: &Vec<&str>, d: usize) -> Self {
         let p0 = vec![IMPOSSIBLE_NB; d];
@@ -222,7 +222,7 @@ impl Infos {
 
         let MT = MT_table(&S, &mut alphabet);
 
-        return Infos {
+        return Context {
             alphabet,
             parents,
             MS,
@@ -236,31 +236,32 @@ impl Infos {
 
 // runs the successor a first time
 // this could be avoided
-pub fn init_queue(Q: &mut Vec<Vec<usize>>, S: &Vec<&str>, d: usize, infos: &mut Infos) {
-    *Q = get_starting_p(&infos, &S);
+pub fn init_queue(queue: &mut Vec<Vec<usize>>, S: &Vec<&str>, d: usize, ctx: &mut Context) {
+    *queue = get_starting_p(&ctx, &S);
 
-    for q in Q.clone() {
-        update_suc(vec![IMPOSSIBLE_NB; d], q.clone(), infos);
+    for q in queue.clone() {
+        update_suc(vec![IMPOSSIBLE_NB; d], q.clone(), ctx);
     }
-    reorder_queue(Q, infos);
+    reorder_queue(queue, ctx);
 }
 
 // given a point p and his successor q, computes necessary informations
-pub fn update_suc(p: Vec<usize>, q: Vec<usize>, infos: &mut Infos) {
+pub fn update_suc(p: Vec<usize>, q: Vec<usize>, ctx: &mut Context) {
     // g(q) = g(p) + 1
-    let nb = infos.g.get(&p).unwrap() + 1;
-    infos.g.insert(q.clone(), nb);
+    let nb = ctx.g.get(&p).unwrap() + 1;
+    ctx.g.insert(q.clone(), nb);
     // saves the cost function for point p : h(p) + g(p)
-    infos.f.insert(q.clone(), h(&infos.MS, &q, infos.d) + nb);
+    ctx.f.insert(q.clone(), heuristic(&ctx.MS, &q, ctx.d) + nb);
     // saves the fact that p is the parent of q
-    infos.parents.insert(q.clone(), Some(p));
+    ctx.parents.insert(q.clone(), Some(p));
 }
 
 // sorts the queue
-pub fn reorder_queue(Q: &mut Vec<Vec<usize>>, i: &mut Infos) {
-    Q.sort_unstable_by(|p, q| {
+pub fn reorder_queue(queue: &mut Vec<Vec<usize>>, i: &mut Context) {
+    queue.sort_unstable_by(|p, q| {
         if (i.f.get(p) > i.f.get(q))
-            || (i.f.get(p) == i.f.get(q) && h(&i.MS, p, i.d) > h(&i.MS, q, i.d))
+            || (i.f.get(p) == i.f.get(q)
+            && heuristic(&i.MS, p, i.d) > heuristic(&i.MS, q, i.d))
         {
             Ordering::Greater
         } else {
@@ -277,7 +278,7 @@ fn is_match(_P: &Vec<usize>, S: &Vec<&str>) -> bool {
 }
 
 // ascend back up the parent tree to form the string
-pub fn common_seq(i: &Infos, p: &Vec<usize>, S: &Vec<&str>) -> String {
+pub fn common_seq(i: &Context, p: &Vec<usize>, S: &Vec<&str>) -> String {
     let ref_str: Vec<char> = S[0].chars().collect();
     let mut s: Vec<char> = vec![];
     // Gaining mutability

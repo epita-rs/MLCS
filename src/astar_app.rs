@@ -17,49 +17,49 @@ pub fn astar_app(S: &Vec<&str>) -> String {
     // Preprocessing
     let d = S.len();
 
-    let mut infos = Infos::new(S, d);
+    let mut ctx = Context::new(S, d);
 
-    // Queue
-    let mut Q: Vec<Vec<usize>> = vec![];
-    init_queue(&mut Q, S, d, &mut infos);
+    // queueueue
+    let mut queue: Vec<Vec<usize>> = vec![];
+    init_queue(&mut queue, S, d, &mut ctx);
 
-    while Q.len() > 0 {
-        // y = max( {f(p) | p in Q} )
-        let mut y = f(&infos, Q.last().unwrap());
+    while queue.len() > 0 {
+        // y = max( {f(p) | p in queue} )
+        let mut y = f(&ctx, queue.last().unwrap());
 
         // y = y - c // without overflow
         if y > c {
             y -= c;
         }
 
-        // R = { p | p in Q and y <= f(p) }
-        let R = Q
+        // R = { p | p in queue and y <= f(p) }
+        let R = queue
             .clone()
             .into_iter()
-            .filter(|p| y <= f(&infos, p))
+            .filter(|p| y <= f(&ctx, p))
             .collect::<Vec<Vec<usize>>>();
-        Q.clear();
+        queue.clear();
 
         for p in R {
-            if h(&infos.MS, &p, d) == 0 {
+            if heuristic(&ctx.MS, &p, d) == 0 {
                 // An MLCS match was found
-                return common_seq(&infos, &p, S);
+                return common_seq(&ctx, &p, S);
             } else {
                 // inserting all succesors in the queue
-                let succs = get_successors(&infos, &S, &p);
+                let succs = get_successors(&ctx, &S, &p);
                 for q in succs {
-                    // basically saying if the queue Q does not already
+                    // basically saying if the queue queue does not already
                     // contain the point q
-                    if !Q.contains(&q) {
-                        update_suc(p.clone(), q.clone(), &mut infos);
-                        Q.push(q);
-                    } else if g(&infos, &q) < g(&infos, &p) + 1 {
-                        update_suc(p.clone(), q.clone(), &mut infos);
+                    if !queue.contains(&q) {
+                        update_suc(p.clone(), q.clone(), &mut ctx);
+                        queue.push(q);
+                    } else if g(&ctx, &q) < g(&ctx, &p) + 1 {
+                        update_suc(p.clone(), q.clone(), &mut ctx);
                     }
                 }
             }
         }
-        reorder_queue(&mut Q, &mut infos);
+        reorder_queue(&mut queue, &mut ctx);
     }
     return String::from("");
 }
