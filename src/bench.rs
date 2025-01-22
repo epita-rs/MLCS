@@ -28,11 +28,11 @@ pub fn random(c: &mut Criterion, f: fn(&Vec<&str>) -> String, infos: Vec<usize>)
 pub fn medium(c: &mut Criterion, f: fn(&Vec<&str>) -> String) {
     random(c, f, vec![10, 10]);
     random(c, f, vec![10, 40]);
-    random(c, f, vec![20, 40]);
-    random(c, f, vec![5, 50]);
+    random(c, f, vec![20, 20]);
+    random(c, f, vec![30, 30]);
 }
 pub fn hard(c: &mut Criterion, f: fn(&Vec<&str>) -> String) {
-    random(c, f, vec![50, 50]);
+    random(c, f, vec![40, 40]);
     random(c, f, vec![5, 80]);
 }
 pub fn complete_astar_app(c: &mut Criterion) {
