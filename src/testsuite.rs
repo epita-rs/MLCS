@@ -4,7 +4,7 @@ use crate::utils::get_alphabet;
 use rand::{seq::SliceRandom, thread_rng, Rng}; // Random number generator
 
 // @brief : shuffles a string
-fn shuffle_string(input: &str) -> String {
+fn _shuffle_string(input: &str) -> String {
     let mut chars: Vec<char> = input.chars().collect();
     let mut rng = thread_rng();
     chars.shuffle(&mut rng);
@@ -14,7 +14,7 @@ fn shuffle_string(input: &str) -> String {
 // @brief generates an random alphabet in the whole unicode range
 // TODO keeping printable characters
 
-fn gen_rand_alphabet(count: usize) -> Vec<char> {
+fn _gen_rand_alphabet(count: usize) -> Vec<char> {
     let mut rng = thread_rng();
     let mut alphabet: Vec<char> = vec![];
     while alphabet.len() < count {
