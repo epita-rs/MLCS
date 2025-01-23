@@ -20,7 +20,7 @@ pub fn astar_app(chains: &Vec<&str>) -> String {
 
     // queueueue
     let mut queue: Vec<Vec<usize>> = vec![];
-    init_queue(&mut queue, chains, ctx.d, &mut ctx);
+    init_queue(&mut ctx, &mut queue);
 
     while queue.len() > 0 {
         // y = max( {f(p) | p in queue} )
@@ -42,23 +42,23 @@ pub fn astar_app(chains: &Vec<&str>) -> String {
         for p in second_queue {
             if heuristic(&ctx, &p) == 0 {
                 // An MLCS match was found
-                return common_seq(&ctx, &p, chains);
+                return common_seq(&ctx, &p);
             } else {
                 // inserting all succesors in the queue
-                let succs = get_successors(&ctx, &chains, &p);
+                let succs = get_successors(&ctx, &p);
                 for q in succs {
                     // basically saying if the queue queue does not already
                     // contain the point q
                     if !queue.contains(&q) {
-                        update_suc(p.clone(), q.clone(), &mut ctx);
+                        update_suc(&mut ctx, p.clone(), q.clone());
                         queue.push(q);
                     } else if g(&ctx, &q) < g(&ctx, &p) + 1 {
-                        update_suc(p.clone(), q.clone(), &mut ctx);
+                        update_suc(&mut ctx, p.clone(), q.clone());
                     }
                 }
             }
         }
-        reorder_queue(&mut queue, &mut ctx);
+        reorder_queue(&mut ctx, &mut queue);
     }
     return String::from("");
 }

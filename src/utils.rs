@@ -13,15 +13,14 @@ const IMPOSSIBLE_NB: usize = 999_999_999_999;
 // builds the mt table used for accessing the index of the next char
 // builds the common alphabet at the same time
 // @params ca is the common alphabet
-fn mt_table(chains: &Vec<&str>, alphabet: &mut Vec<char>) -> Vec<Vec<Vec<usize>>> {
-    let sc: Vec<Vec<char>> = chains.iter().map(|s| s.chars().collect()).collect();
-
+fn mt_table(chains: &Vec<Vec<char>>, alphabet: &mut Vec<char>) 
+-> Vec<Vec<Vec<usize>>> {
     let mut mt: Vec<Vec<Vec<usize>>> = vec![];
 
     for ch in alphabet.clone() {
         let mut chain: Vec<Vec<usize>> = vec![];
 
-        for s in &sc {
+        for s in chains {
             let mut v: Vec<usize> = vec![IMPOSSIBLE_NB; s.len()];
             let mut lpos = IMPOSSIBLE_NB;
 
@@ -80,7 +79,7 @@ pub fn g(ctx: &Context, p: &Vec<usize>) -> u64 {
 }
 
 // gets the successors of a specific point
-pub fn get_successors(ctx: &Context, chains: &Vec<&str>, p: &Vec<usize>) -> Vec<Vec<usize>> {
+pub fn get_successors(ctx: &Context, p: &Vec<usize>) -> Vec<Vec<usize>> {
     // OPTI : we may be passing the alphabet param directly as an iterator
     let mut successors: Vec<Vec<usize>> = vec![];
     let mut ch_idx: usize = 0;
@@ -89,7 +88,7 @@ pub fn get_successors(ctx: &Context, chains: &Vec<&str>, p: &Vec<usize>) -> Vec<
     for _ in ctx.alphabet.iter() {
         // for each string, finds the next position of that letter
         let mut succ: Vec<usize> = vec![];
-        for i in 0..(chains.len()) {
+        for i in 0..(ctx.chains.len()) {
             let next_ch_idx = ctx.mt[ch_idx][i][p[i] + 1];
             if next_ch_idx == IMPOSSIBLE_NB {
                 break;
@@ -98,7 +97,7 @@ pub fn get_successors(ctx: &Context, chains: &Vec<&str>, p: &Vec<usize>) -> Vec<
             succ.push(next_ch_idx);
         }
 
-        if succ.len() == chains.len() {
+        if succ.len() == ctx.chains.len() {
             successors.push(succ);
         }
 
@@ -108,32 +107,32 @@ pub fn get_successors(ctx: &Context, chains: &Vec<&str>, p: &Vec<usize>) -> Vec<
 }
 
 // given two strings s1 and s2 we compute the score matrix
-fn score_matrix(s1: &str, s2: &str) -> Vec<Vec<u64>> {
-    let m = s1.chars().count();
-    let n = s2.chars().count();
-    let mut mtx: Vec<Vec<u64>> = vec![vec![0; n + 1]; m + 1];
+// @return matrix of size (m + 1) (n + 1)
+fn score_matrix(s1: &Vec<char>, s2: &Vec<char>) -> Vec<Vec<u64>> {
+    let m = s1.len();
+    let n = s2.len();
+    let mut matrix: Vec<Vec<u64>> = vec![vec![0; n + 1]; m + 1];
+
     for i in (0..(m - 1)).rev() {
         for j in (0..(n - 1)).rev() {
-            mtx[i][j] = 
-                // not efficient line : O(n) for 2 access
-                // to be reviewed later on
-                if s1.chars().nth(i + 1).unwrap() == s2.chars().nth(j + 1).unwrap()
-                    //=============================================================
+
+            matrix[i][j] = 
+                if s1[i + 1] == s2[j + 1]
                 {
-                    mtx[i + 1][j + 1] + 1
+                    matrix[i + 1][j + 1] + 1
                 }
                 else
                 {
-                    max(mtx[i][j + 1], mtx[i + 1][j])
+                    max(matrix[i][j + 1], matrix[i + 1][j])
                 };
         }
     }
 
-   mtx 
+   matrix 
 }
 
 // given the list of strings we compute the set of score matrices
-pub fn matrices_score(chains: &Vec<&str>) -> Vec<Vec<Vec<u64>>> {
+pub fn matrices_score(chains: &Vec<Vec<char>>) -> Vec<Vec<Vec<u64>>> {
     let mut scores: Vec<Vec<Vec<u64>>> = vec![];
     for s1 in chains.iter() {
         for s2 in chains.iter() {
@@ -147,15 +146,14 @@ pub fn matrices_score(chains: &Vec<&str>) -> Vec<Vec<Vec<u64>>> {
 // given the list of strings, finds the minimal alphabet
 // @detail finds the shortest string
 // gets his alphabet
-pub fn get_alphabet(chains: &Vec<&str>) -> Vec<char> {
+pub fn get_alphabet(chains: &Vec<Vec<char>>) -> Vec<char> {
     // OPTI comment
     // use hashmap to keep track of inserted values
     let mut alphabet: Vec<char> = chains
         .iter()
         .min_by_key(|s| s.len())
         .expect("No minimum found")
-        .chars()
-        .collect();
+        .to_vec();
     alphabet.sort();
     alphabet.dedup();
 
@@ -163,7 +161,7 @@ pub fn get_alphabet(chains: &Vec<&str>) -> Vec<char> {
 }
 
 // gets the first matches
-pub fn get_starting_p(ctx: &Context, chains: &Vec<&str>) -> Vec<Vec<usize>> {
+pub fn get_starting_p(ctx: &Context) -> Vec<Vec<usize>> {
     // OPTI : we may be passing the alphabet param directly as an iterator
     let mut successors: Vec<Vec<usize>> = vec![];
     let mut ch_idx: usize = 0;
@@ -172,7 +170,7 @@ pub fn get_starting_p(ctx: &Context, chains: &Vec<&str>) -> Vec<Vec<usize>> {
     for _ in ctx.alphabet.iter() {
         // for each string, finds the next position of that letter
         let mut succ: Vec<usize> = vec![];
-        for i in 0..(chains.len()) {
+        for i in 0..(ctx.chains.len()) {
             let next_ch_idx = ctx.mt[ch_idx][i][0];
             if next_ch_idx == IMPOSSIBLE_NB {
                 break;
@@ -181,7 +179,7 @@ pub fn get_starting_p(ctx: &Context, chains: &Vec<&str>) -> Vec<Vec<usize>> {
             succ.push(next_ch_idx);
         }
 
-        if succ.len() == chains.len() {
+        if succ.len() == ctx.chains.len() {
             successors.push(succ);
         }
 
@@ -199,18 +197,23 @@ pub struct Context {
     mt: Vec<Vec<Vec<usize>>>,
     pub g: HashMap<Vec<usize>, u64>,
     f: HashMap<Vec<usize>, u64>,
+    chains: Vec<Vec<char>>,
     pub d: usize,
 }
 
 impl Context {
-    // basic preprocessing
-    pub fn new(chains: &Vec<&str>) -> Self {
-        let d = chains.len();
+    pub fn new(strings: &Vec<&str>) -> Self {
+        // cast to ease [index] accessibily
+        let chains: Vec<Vec<char>> = strings.iter()
+                                         .map(|s| s.chars()
+                                                   .collect())
+                                         .collect();
+        let d = strings.len();
 
         // an impossible point, father of all
         let p0 = vec![IMPOSSIBLE_NB; d];
 
-        let ms: Vec<Vec<Vec<u64>>> = matrices_score(chains);
+        let ms: Vec<Vec<Vec<u64>>> = matrices_score(&chains);
 
         let mut parents: HashMap<_, Option<Vec<usize>>> = HashMap::new();
         parents.insert(p0.clone(), None);
@@ -221,7 +224,7 @@ impl Context {
         let mut f: HashMap<Vec<usize>, u64> = HashMap::new();
         f.insert(p0.clone(), 0);
 
-        let mut alphabet: Vec<char> = get_alphabet(chains);
+        let mut alphabet: Vec<char> = get_alphabet(&chains);
 
         let mt = mt_table(&chains, &mut alphabet);
 
@@ -232,6 +235,7 @@ impl Context {
             mt,
             g,
             f,
+            chains,
             d,
         };
     }
@@ -239,17 +243,18 @@ impl Context {
 
 // runs the successor a first time
 // this could be avoided
-pub fn init_queue(queue: &mut Vec<Vec<usize>>, chains: &Vec<&str>, d: usize, ctx: &mut Context) {
-    *queue = get_starting_p(&ctx, &chains);
+pub fn init_queue(ctx: &mut Context, queue: &mut Vec<Vec<usize>>) {
+    *queue = get_starting_p(&ctx);
 
     for q in queue.clone() {
-        update_suc(vec![IMPOSSIBLE_NB; d], q.clone(), ctx);
+        update_suc(ctx, vec![IMPOSSIBLE_NB; ctx.d], q.clone());
     }
-    reorder_queue(queue, ctx);
+    reorder_queue(ctx, queue);
 }
 
 // given a point p and his successor q, computes necessary informations
-pub fn update_suc(p: Vec<usize>, q: Vec<usize>, ctx: &mut Context) {
+// point p is marked PARENT of q
+pub fn update_suc(ctx: &mut Context, p: Vec<usize>, q: Vec<usize>) {
     // g(q) = g(p) + 1
     let nb = ctx.g.get(&p).unwrap() + 1;
     ctx.g.insert(q.clone(), nb);
@@ -260,7 +265,7 @@ pub fn update_suc(p: Vec<usize>, q: Vec<usize>, ctx: &mut Context) {
 }
 
 // sorts the queue
-pub fn reorder_queue(queue: &mut Vec<Vec<usize>>, ctx: &mut Context) {
+pub fn reorder_queue(ctx: &mut Context, queue: &mut Vec<Vec<usize>>) {
     queue.sort_unstable_by(|p, q| {
         if (ctx.f.get(p) > ctx.f.get(q))
             || (ctx.f.get(p) == ctx.f.get(q)
@@ -273,19 +278,19 @@ pub fn reorder_queue(queue: &mut Vec<Vec<usize>>, ctx: &mut Context) {
     });
 }
 
-// ascend back up the parent tree to form the string
-pub fn common_seq(i: &Context, p: &Vec<usize>, chains: &Vec<&str>) -> String {
-    let ref_str: Vec<char> = chains[0].chars().collect();
-    let mut s: Vec<char> = vec![];
+// ascend back up the parent tree to form the common string
+pub fn common_seq(ctx: &Context, p: &Vec<usize>) -> String {
+    let ref_str: &Vec<char> = &ctx.chains[0];
+    let mut common_sequence: Vec<char> = vec![];
     // Gaining mutability
     let mut p = p;
 
-    while *i.parents.get(p).unwrap() != None {
-        s.push(ref_str[p[0]]);
+    while *ctx.parents.get(p).unwrap() != None {
+        common_sequence.push(ref_str[p[0]]);
 
         // getting the parent of current point
-        p = &i.parents.get(p).unwrap().as_ref().unwrap();
+        p = &ctx.parents.get(p).unwrap().as_ref().unwrap();
     }
 
-    s.iter().rev().collect::<String>()
+    common_sequence.iter().rev().collect::<String>()
 }

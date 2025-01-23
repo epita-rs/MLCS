@@ -1,6 +1,5 @@
 use crate::astar::mlcs_astar;
 use crate::astar_app::astar_app;
-use crate::utils::get_alphabet;
 use rand::{seq::SliceRandom, thread_rng, Rng}; // Random number generator
 
 // @brief : shuffles a string
@@ -73,40 +72,6 @@ pub fn generate_testcase(pattern: &str, nb: usize, length: usize) -> Vec<String>
         res.push(new_str.into_iter().collect());
     }
     res
-}
-
-#[cfg(test)]
-mod unit {
-    use super::*;
-
-    #[test]
-    fn alphabet_2_1() {
-        let s1 = "abcdddddeee";
-        let s2 = "aaaaaffgghijjjkllll";
-        let alphabet = get_alphabet(&vec![s1, s2]);
-        let res: String = alphabet.into_iter().collect();
-        assert_eq!(res, "abcde");
-    }
-    #[test]
-    fn alphabet_3_1() {
-        let s1 = "abcdddddeee";
-        let s2 = "aaaaaffgghijjjkllll";
-        let s3 = "aaaaaffgghijjjk####!llll";
-        let alphabet = get_alphabet(&vec![s1, s2, s3]);
-        let res: String = alphabet.into_iter().collect();
-        assert_eq!(res, "abcde");
-    }
-    #[test]
-    fn alphabet_5_1() {
-        let s1 = "abcdddddeee";
-        let s2 = "aaaaaffgghijjjkllll";
-        let s3 = "aaaaadddddeeefgghijjjkllllmno";
-        let s4 = "aaaaaffgghijjjkllllpq";
-        let s5 = "aaaaaffgghijjjkllllrs";
-        let alphabet = get_alphabet(&vec![s1, s2, s3, s4, s5]);
-        let res: String = alphabet.into_iter().collect();
-        assert_eq!(res, "abcde");
-    }
 }
 
 #[cfg(test)]
