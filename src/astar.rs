@@ -17,7 +17,7 @@ pub fn mlcs_astar(chains: &Vec<&str>) -> String {
     let mut queue: Vec<Vec<usize>> = vec![];
     init_queue(&mut ctx, &mut queue);
 
-    while queue.len() > 0 {
+    while !queue.is_empty() {
         let p: Vec<usize> = queue.pop().unwrap().clone();
 
         if heuristic(&ctx, &p) == 0 {
@@ -38,5 +38,5 @@ pub fn mlcs_astar(chains: &Vec<&str>) -> String {
             reorder_queue(&mut ctx, &mut queue);
         }
     }
-    return String::from("");
+    String::from("")
 }

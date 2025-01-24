@@ -5,7 +5,6 @@ mod utils;
 use astar::mlcs_astar;
 
 fn main() {
-
     let chains = vec![
         "🤶🤶99🤶🤶🤶7🤶7🤶🤶🤶6ghg",
         "字字9字字字9776字字字ghg字",

@@ -14,7 +14,6 @@ const C: u64 = 20;
 /// * `String` if the strings are not anagrams.
 /// * `String::new("")' if no MLCS was found
 pub fn astar_app(chains: &Vec<&str>) -> String {
-
     // Preprocessing
     let mut ctx = Context::new(chains);
 
@@ -22,7 +21,7 @@ pub fn astar_app(chains: &Vec<&str>) -> String {
     let mut queue: Vec<Vec<usize>> = vec![];
     init_queue(&mut ctx, &mut queue);
 
-    while queue.len() > 0 {
+    while !queue.is_empty() {
         // y = max( {f(p) | p in queue} )
         let mut y = f(&ctx, queue.last().unwrap());
 
@@ -60,5 +59,5 @@ pub fn astar_app(chains: &Vec<&str>) -> String {
         }
         reorder_queue(&mut ctx, &mut queue);
     }
-    return String::from("");
+    String::from("")
 }

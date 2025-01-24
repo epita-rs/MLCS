@@ -13,8 +13,7 @@ const IMPOSSIBLE_NB: usize = 999_999_999_999;
 // builds the mt table used for accessing the index of the next char
 // builds the common alphabet at the same time
 // @params ca is the common alphabet
-fn mt_table(chains: &Vec<Vec<char>>, alphabet: &mut Vec<char>) 
--> Vec<Vec<Vec<usize>>> {
+fn mt_table(chains: &Vec<Vec<char>>, alphabet: &mut Vec<char>) -> Vec<Vec<Vec<usize>>> {
     let mut mt: Vec<Vec<Vec<usize>>> = vec![];
 
     for ch in alphabet.clone() {
@@ -115,20 +114,15 @@ fn score_matrix(s1: &Vec<char>, s2: &Vec<char>) -> Vec<Vec<u64>> {
 
     for i in (0..(m - 1)).rev() {
         for j in (0..(n - 1)).rev() {
-
-            matrix[i][j] = 
-                if s1[i + 1] == s2[j + 1]
-                {
-                    matrix[i + 1][j + 1] + 1
-                }
-                else
-                {
-                    max(matrix[i][j + 1], matrix[i + 1][j])
-                };
+            matrix[i][j] = if s1[i + 1] == s2[j + 1] {
+                matrix[i + 1][j + 1] + 1
+            } else {
+                max(matrix[i][j + 1], matrix[i + 1][j])
+            };
         }
     }
 
-   matrix 
+    matrix
 }
 
 // given the list of strings we compute the set of score matrices
@@ -204,10 +198,7 @@ pub struct Context {
 impl Context {
     pub fn new(strings: &Vec<&str>) -> Self {
         // cast to ease [index] accessibily
-        let chains: Vec<Vec<char>> = strings.iter()
-                                         .map(|s| s.chars()
-                                                   .collect())
-                                         .collect();
+        let chains: Vec<Vec<char>> = strings.iter().map(|s| s.chars().collect()).collect();
         let d = strings.len();
 
         // an impossible point, father of all
@@ -228,7 +219,7 @@ impl Context {
 
         let mt = mt_table(&chains, &mut alphabet);
 
-        return Context {
+        Context {
             alphabet,
             parents,
             ms,
@@ -237,7 +228,7 @@ impl Context {
             f,
             chains,
             d,
-        };
+        }
     }
 }
 
@@ -268,8 +259,7 @@ pub fn update_suc(ctx: &mut Context, p: Vec<usize>, q: Vec<usize>) {
 pub fn reorder_queue(ctx: &mut Context, queue: &mut Vec<Vec<usize>>) {
     queue.sort_unstable_by(|p, q| {
         if (ctx.f.get(p) > ctx.f.get(q))
-            || (ctx.f.get(p) == ctx.f.get(q)
-            && heuristic(&ctx, p) > heuristic(&ctx, q))
+            || (ctx.f.get(p) == ctx.f.get(q) && heuristic(ctx, p) > heuristic(ctx, q))
         {
             Ordering::Greater
         } else {
@@ -285,7 +275,7 @@ pub fn common_seq(ctx: &Context, p: &Vec<usize>) -> String {
     // Gaining mutability
     let mut p = p;
 
-    while *ctx.parents.get(p).unwrap() != None {
+    while ctx.parents.get(p).unwrap().is_some() {
         common_sequence.push(ref_str[p[0]]);
 
         // getting the parent of current point

@@ -40,10 +40,7 @@ pub fn generate_testcase(pattern: &str, nb: usize, length: usize) -> Vec<String>
     let mut rng = thread_rng();
 
     // building an alphabet free from characters in pattern
-    let mut alphabet: Vec<char> = alphab
-                                  .chars()
-                                  .filter(|x| !pattern.contains(*x))
-                                  .collect();
+    let mut alphabet: Vec<char> = alphab.chars().filter(|x| !pattern.contains(*x)).collect();
     alphabet.shuffle(&mut rng);
     alphabet.truncate(nb);
 
@@ -93,7 +90,7 @@ mod functionnal {
             )*
         };
     }
-    
+
     macro_rules! astar_complete {
         ($name:expr) => {
             astar_tests! {
@@ -115,10 +112,10 @@ mod functionnal {
             */
             }
         };
-    }   
+    }
 
     astar_complete!(mlcs_astar);
-    
+
     #[test]
     fn basic_3_1() {
         let s1 = "wowww";
@@ -256,7 +253,7 @@ mod astar_app {
             )*
         };
     }
-    
+
     macro_rules! astar_complete {
         ($name:expr) => {
             astar_tests! {
@@ -278,10 +275,9 @@ mod astar_app {
             */
             }
         };
-    }   
+    }
 
     astar_complete!(astar_app);
-    
 
     #[test]
     fn basic_3_1() {
