@@ -54,7 +54,7 @@ fn translate(i: usize, j: usize, d: usize) -> usize {
 }
 
 // given a point, computes the heuristic function
-pub fn heuristic(ctx: &Context, p: &Vec<usize>) -> u64 {
+pub fn heuristic(ctx: &Context, p: &[usize]) -> u64 {
     let mut similarity: Vec<u64> = vec![];
     for i in 0..ctx.d {
         for j in 0..ctx.d {
@@ -78,13 +78,11 @@ pub fn g(ctx: &Context, p: &Vec<usize>) -> u64 {
 }
 
 // gets the successors of a specific point
-pub fn get_successors(ctx: &Context, p: &Vec<usize>) -> Vec<Vec<usize>> {
-    // OPTI : we may be passing the alphabet param directly as an iterator
+pub fn get_successors(ctx: &Context, p: &[usize]) -> Vec<Vec<usize>> {
     let mut successors: Vec<Vec<usize>> = vec![];
-    let mut ch_idx: usize = 0;
 
     // for all alphabet letters
-    for _ in ctx.alphabet.iter() {
+    for (ch_idx, _) in ctx.alphabet.iter().enumerate() {
         // for each string, finds the next position of that letter
         let mut succ: Vec<usize> = vec![];
         for i in 0..(ctx.chains.len()) {
@@ -99,15 +97,13 @@ pub fn get_successors(ctx: &Context, p: &Vec<usize>) -> Vec<Vec<usize>> {
         if succ.len() == ctx.chains.len() {
             successors.push(succ);
         }
-
-        ch_idx += 1;
     }
     successors
 }
 
 // given two strings s1 and s2 we compute the score matrix
 // @return matrix of size (m + 1) (n + 1)
-fn score_matrix(s1: &[char], s2: &Vec<char>) -> Vec<Vec<u64>> {
+fn score_matrix(s1: &[char], s2: &[char]) -> Vec<Vec<u64>> {
     let m = s1.len();
     let n = s2.len();
     let mut matrix: Vec<Vec<u64>> = vec![vec![0; n + 1]; m + 1];
@@ -126,7 +122,7 @@ fn score_matrix(s1: &[char], s2: &Vec<char>) -> Vec<Vec<u64>> {
 }
 
 // given the list of strings we compute the set of score matrices
-pub fn matrices_score(chains: &Vec<Vec<char>>) -> Vec<Vec<Vec<u64>>> {
+pub fn matrices_score(chains: &[Vec<char>]) -> Vec<Vec<Vec<u64>>> {
     let mut scores: Vec<Vec<Vec<u64>>> = vec![];
     for s1 in chains.iter() {
         for s2 in chains.iter() {
@@ -140,7 +136,7 @@ pub fn matrices_score(chains: &Vec<Vec<char>>) -> Vec<Vec<Vec<u64>>> {
 // given the list of strings, finds the minimal alphabet
 // @detail finds the shortest string
 // gets his alphabet
-pub fn get_alphabet(chains: &Vec<Vec<char>>) -> Vec<char> {
+pub fn get_alphabet(chains: &[Vec<char>]) -> Vec<char> {
     // OPTI comment
     // use hashmap to keep track of inserted values
     let mut alphabet: Vec<char> = chains
@@ -158,10 +154,9 @@ pub fn get_alphabet(chains: &Vec<Vec<char>>) -> Vec<char> {
 pub fn get_starting_p(ctx: &Context) -> Vec<Vec<usize>> {
     // OPTI : we may be passing the alphabet param directly as an iterator
     let mut successors: Vec<Vec<usize>> = vec![];
-    let mut ch_idx: usize = 0;
 
     // for all alphabet letters
-    for _ in ctx.alphabet.iter() {
+    for (ch_idx, _) in ctx.alphabet.iter().enumerate() {
         // for each string, finds the next position of that letter
         let mut succ: Vec<usize> = vec![];
         for i in 0..(ctx.chains.len()) {
@@ -177,7 +172,6 @@ pub fn get_starting_p(ctx: &Context) -> Vec<Vec<usize>> {
             successors.push(succ);
         }
 
-        ch_idx += 1;
     }
 
     successors
@@ -196,7 +190,7 @@ pub struct Context {
 }
 
 impl Context {
-    pub fn new(strings: &Vec<&str>) -> Self {
+    pub fn new(strings: &[&str]) -> Self {
         // cast to ease [index] accessibily
         let chains: Vec<Vec<char>> = strings.iter().map(|s| s.chars().collect()).collect();
         let d = strings.len();
@@ -235,7 +229,7 @@ impl Context {
 // runs the successor a first time
 // this could be avoided
 pub fn init_queue(ctx: &mut Context, queue: &mut Vec<Vec<usize>>) {
-    *queue = get_starting_p(&ctx);
+    *queue = get_starting_p(ctx);
 
     for q in queue.clone() {
         update_suc(ctx, vec![IMPOSSIBLE_NB; ctx.d], q.clone());

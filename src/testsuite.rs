@@ -1,5 +1,3 @@
-use crate::astar::mlcs_astar;
-use crate::astar_app::astar_app;
 use rand::{seq::SliceRandom, thread_rng, Rng}; // Random number generator
 
 // @brief : shuffles a string
@@ -74,6 +72,7 @@ pub fn generate_testcase(pattern: &str, nb: usize, length: usize) -> Vec<String>
 #[cfg(test)]
 mod functionnal {
     use super::*;
+    use crate::astar::mlcs_astar;
 
     macro_rules! astar_tests {
         ($($name:ident: $arg:expr,)*) => {
@@ -237,6 +236,7 @@ mod functionnal {
 #[cfg(test)]
 mod astar_app {
     use super::*;
+    use crate::astar_app::astar_app;
 
     macro_rules! astar_tests {
         ($($name:ident: $arg:expr,)*) => {

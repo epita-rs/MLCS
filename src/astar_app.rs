@@ -1,7 +1,5 @@
 use crate::utils::*;
 
-const _K: usize = 2000;
-const C: u64 = 20;
 
 /// Outputs the Longest Common Subsequence among Multiple strings (MLCS)
 ///
@@ -14,6 +12,10 @@ const C: u64 = 20;
 /// * `String` if the strings are not anagrams.
 /// * `String::new("")' if no MLCS was found
 pub fn astar_app(chains: &Vec<&str>) -> String {
+
+    const C: u64 = 20;
+    const _K: usize = 2000;
+
     // Preprocessing
     let mut ctx = Context::new(chains);
 
