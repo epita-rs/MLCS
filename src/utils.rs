@@ -85,8 +85,11 @@ pub fn get_successors(ctx: &Context, p: &[usize]) -> Vec<Vec<usize>> {
     for (ch_idx, _) in ctx.alphabet.iter().enumerate() {
         // for each string, finds the next position of that letter
         let mut succ: Vec<usize> = vec![];
-        for i in 0..(ctx.chains.len()) {
-            let next_ch_idx = ctx.mt[ch_idx][i][p[i] + 1];
+        for (i, p_ith_elt) in p.iter()
+                                      .enumerate()
+                                      .take(ctx.chains.len())
+        {
+            let next_ch_idx = ctx.mt[ch_idx][i][p_ith_elt + 1];
             if next_ch_idx == IMPOSSIBLE_NB {
                 break;
             }
