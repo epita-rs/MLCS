@@ -69,12 +69,12 @@ pub fn heuristic(ctx: &Context, p: &Vec<usize>) -> u64 {
 
 // retreives the value of f(p)
 pub fn f(ctx: &Context, p: &Vec<usize>) -> u64 {
-    ctx.f.get(p).unwrap().clone()
+    *ctx.f.get(p).unwrap()
 }
 
 // retreives the value of g(p)
 pub fn g(ctx: &Context, p: &Vec<usize>) -> u64 {
-    ctx.g.get(p).unwrap().clone()
+    *ctx.g.get(p).unwrap()
 }
 
 // gets the successors of a specific point
@@ -107,7 +107,7 @@ pub fn get_successors(ctx: &Context, p: &Vec<usize>) -> Vec<Vec<usize>> {
 
 // given two strings s1 and s2 we compute the score matrix
 // @return matrix of size (m + 1) (n + 1)
-fn score_matrix(s1: &Vec<char>, s2: &Vec<char>) -> Vec<Vec<u64>> {
+fn score_matrix(s1: &[char], s2: &Vec<char>) -> Vec<Vec<u64>> {
     let m = s1.len();
     let n = s2.len();
     let mut matrix: Vec<Vec<u64>> = vec![vec![0; n + 1]; m + 1];
@@ -250,13 +250,13 @@ pub fn update_suc(ctx: &mut Context, p: Vec<usize>, q: Vec<usize>) {
     let nb = ctx.g.get(&p).unwrap() + 1;
     ctx.g.insert(q.clone(), nb);
     // saves the cost function for point p : h(p) + g(p)
-    ctx.f.insert(q.clone(), heuristic(&ctx, &q) + nb);
+    ctx.f.insert(q.clone(), heuristic(ctx, &q) + nb);
     // saves the fact that p is the parent of q
     ctx.parents.insert(q.clone(), Some(p));
 }
 
 // sorts the queue
-pub fn reorder_queue(ctx: &mut Context, queue: &mut Vec<Vec<usize>>) {
+pub fn reorder_queue(ctx: &mut Context, queue: &mut [Vec<usize>]) {
     queue.sort_unstable_by(|p, q| {
         if (ctx.f.get(p) > ctx.f.get(q))
             || (ctx.f.get(p) == ctx.f.get(q) && heuristic(ctx, p) > heuristic(ctx, q))
@@ -279,7 +279,7 @@ pub fn common_seq(ctx: &Context, p: &Vec<usize>) -> String {
         common_sequence.push(ref_str[p[0]]);
 
         // getting the parent of current point
-        p = &ctx.parents.get(p).unwrap().as_ref().unwrap();
+        p = ctx.parents.get(p).unwrap().as_ref().unwrap();
     }
 
     common_sequence.iter().rev().collect::<String>()
