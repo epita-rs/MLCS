@@ -1,6 +1,7 @@
 use std::cmp::max;
 use std::cmp::Ordering;
 use std::collections::HashMap;
+use std::rc::Rc;
 
 const IMPOSSIBLE_NB: usize = 999_999_999_999;
 
@@ -10,12 +11,11 @@ const IMPOSSIBLE_NB: usize = 999_999_999_999;
 // 2. Store pointers instead of cloning everything everywhere
 // Look at Rc and RefCell
 
-// builds the mt table used for accessing the index of the next char
-// builds the common alphabet at the same time
-// @params ca is the common alphabet
-fn mt_table(chains: &Vec<Vec<char>>, alphabet: &mut Vec<char>) 
+// builds the lookup_table table used for accessing the index of the next char
+// refines the common alphabet at the same time
+fn ctx_lookup_table(chains: &Vec<Vec<char>>, alphabet: &mut Vec<char>) 
 -> Vec<Vec<Vec<usize>>> {
-    let mut mt: Vec<Vec<Vec<usize>>> = vec![];
+    let mut lookup_table: Vec<Vec<Vec<usize>>> = vec![];
 
     for ch in alphabet.clone() {
         let mut chain: Vec<Vec<usize>> = vec![];
@@ -42,11 +42,11 @@ fn mt_table(chains: &Vec<Vec<char>>, alphabet: &mut Vec<char>)
         }
 
         if !chain.is_empty() {
-            mt.push(chain);
+            lookup_table.push(chain);
         }
     }
 
-    mt
+    lookup_table
 }
 
 //given given 2D coordinates, translates into 1D coordinates
@@ -55,7 +55,8 @@ fn translate(i: usize, j: usize, d: usize) -> usize {
 }
 
 // given a point, computes the heuristic function
-pub fn heuristic(ctx: &Context, p: &Vec<usize>) -> u64 {
+pub fn heuristic(ctx: &Context, ref_p: &Rc<Vec<usize>>) -> u64 {
+    let p:Vec<usize> = ref_p.to_vec();
     let mut similarity: Vec<u64> = vec![];
     for i in 0..ctx.d {
         for j in 0..ctx.d {
@@ -69,19 +70,19 @@ pub fn heuristic(ctx: &Context, p: &Vec<usize>) -> u64 {
 }
 
 // retreives the value of f(p)
-pub fn f(ctx: &Context, p: &Vec<usize>) -> u64 {
-    ctx.f.get(p).unwrap().clone()
+pub fn f(ctx: &Context, p: &Rc<Vec<usize>>) -> u64 {
+    ctx.f.get(&Rc::clone(p)).unwrap().clone()
 }
 
 // retreives the value of g(p)
-pub fn g(ctx: &Context, p: &Vec<usize>) -> u64 {
-    ctx.g.get(p).unwrap().clone()
+pub fn g(ctx: &Context, p: &Rc<Vec<usize>>) -> u64 {
+    ctx.g.get(&Rc::clone(p)).unwrap().clone()
 }
 
 // gets the successors of a specific point
-pub fn get_successors(ctx: &Context, p: &Vec<usize>) -> Vec<Vec<usize>> {
+pub fn get_successors(ctx: &Context, p: &Rc<Vec<usize>>) -> Vec<Rc<Vec<usize>>> {
     // OPTI : we may be passing the alphabet param directly as an iterator
-    let mut successors: Vec<Vec<usize>> = vec![];
+    let mut successors: Vec<Rc<Vec<usize>>> = vec![];
     let mut ch_idx: usize = 0;
 
     // for all alphabet letters
@@ -89,7 +90,7 @@ pub fn get_successors(ctx: &Context, p: &Vec<usize>) -> Vec<Vec<usize>> {
         // for each string, finds the next position of that letter
         let mut succ: Vec<usize> = vec![];
         for i in 0..(ctx.chains.len()) {
-            let next_ch_idx = ctx.mt[ch_idx][i][p[i] + 1];
+            let next_ch_idx = ctx.lookup_table[ch_idx][i][p[i] + 1];
             if next_ch_idx == IMPOSSIBLE_NB {
                 break;
             }
@@ -98,7 +99,7 @@ pub fn get_successors(ctx: &Context, p: &Vec<usize>) -> Vec<Vec<usize>> {
         }
 
         if succ.len() == ctx.chains.len() {
-            successors.push(succ);
+            successors.push(Rc::new(succ));
         }
 
         ch_idx += 1;
@@ -161,9 +162,9 @@ pub fn get_alphabet(chains: &Vec<Vec<char>>) -> Vec<char> {
 }
 
 // gets the first matches
-pub fn get_starting_p(ctx: &Context) -> Vec<Vec<usize>> {
+pub fn get_starting_p(ctx: &Context) -> Vec<Rc<Vec<usize>>> {
     // OPTI : we may be passing the alphabet param directly as an iterator
-    let mut successors: Vec<Vec<usize>> = vec![];
+    let mut successors: Vec<Rc<Vec<usize>>> = vec![];
     let mut ch_idx: usize = 0;
 
     // for all alphabet letters
@@ -171,7 +172,7 @@ pub fn get_starting_p(ctx: &Context) -> Vec<Vec<usize>> {
         // for each string, finds the next position of that letter
         let mut succ: Vec<usize> = vec![];
         for i in 0..(ctx.chains.len()) {
-            let next_ch_idx = ctx.mt[ch_idx][i][0];
+            let next_ch_idx = ctx.lookup_table[ch_idx][i][0];
             if next_ch_idx == IMPOSSIBLE_NB {
                 break;
             }
@@ -180,7 +181,7 @@ pub fn get_starting_p(ctx: &Context) -> Vec<Vec<usize>> {
         }
 
         if succ.len() == ctx.chains.len() {
-            successors.push(succ);
+            successors.push(Rc::new(succ));
         }
 
         ch_idx += 1;
@@ -192,11 +193,11 @@ pub fn get_starting_p(ctx: &Context) -> Vec<Vec<usize>> {
 // saves all the ctx needed to perform the algo in one place
 pub struct Context {
     alphabet: Vec<char>,
-    parents: HashMap<Vec<usize>, Option<Vec<usize>>>,
+    parents: HashMap<Rc<Vec<usize>>, Option<Rc<Vec<usize>>>>,
     pub ms: Vec<Vec<Vec<u64>>>,
-    mt: Vec<Vec<Vec<usize>>>,
-    pub g: HashMap<Vec<usize>, u64>,
-    f: HashMap<Vec<usize>, u64>,
+    lookup_table: Vec<Vec<Vec<usize>>>,
+    pub g: HashMap<Rc<Vec<usize>>, u64>,
+    f: HashMap<Rc<Vec<usize>>, u64>,
     chains: Vec<Vec<char>>,
     pub d: usize,
 }
@@ -211,28 +212,28 @@ impl Context {
         let d = strings.len();
 
         // an impossible point, father of all
-        let p0 = vec![IMPOSSIBLE_NB; d];
+        let p0 = Rc::new(vec![IMPOSSIBLE_NB; d]);
 
         let ms: Vec<Vec<Vec<u64>>> = matrices_score(&chains);
 
-        let mut parents: HashMap<_, Option<Vec<usize>>> = HashMap::new();
-        parents.insert(p0.clone(), None);
+        let mut parents: HashMap<_, Option<Rc<Vec<usize>>>> = HashMap::new();
+        parents.insert(Rc::clone(&p0), None);
 
         let mut g = HashMap::new();
-        g.insert(p0.clone(), 0);
+        g.insert(Rc::clone(&p0), 0);
 
-        let mut f: HashMap<Vec<usize>, u64> = HashMap::new();
-        f.insert(p0.clone(), 0);
+        let mut f: HashMap<Rc<Vec<usize>>, u64> = HashMap::new();
+        f.insert(Rc::clone(&p0), 0);
 
         let mut alphabet: Vec<char> = get_alphabet(&chains);
 
-        let mt = mt_table(&chains, &mut alphabet);
+        let lookup_table = ctx_lookup_table(&chains, &mut alphabet);
 
         return Context {
             alphabet,
             parents,
             ms,
-            mt,
+            lookup_table,
             g,
             f,
             chains,
@@ -243,29 +244,29 @@ impl Context {
 
 // runs the successor a first time
 // this could be avoided
-pub fn init_queue(ctx: &mut Context, queue: &mut Vec<Vec<usize>>) {
+pub fn init_queue(ctx: &mut Context, queue: &mut Vec<Rc<Vec<usize>>>) {
     *queue = get_starting_p(&ctx);
 
-    for q in queue.clone() {
-        update_suc(ctx, vec![IMPOSSIBLE_NB; ctx.d], q.clone());
+    for ref_q in queue.clone() {
+        update_suc(ctx, &Rc::new(vec![IMPOSSIBLE_NB; ctx.d]), &Rc::clone(&ref_q));
     }
     reorder_queue(ctx, queue);
 }
 
 // given a point p and his successor q, computes necessary informations
 // point p is marked PARENT of q
-pub fn update_suc(ctx: &mut Context, p: Vec<usize>, q: Vec<usize>) {
+pub fn update_suc(ctx: &mut Context, p: &Rc<Vec<usize>>, q: &Rc<Vec<usize>>) {
     // g(q) = g(p) + 1
-    let nb = ctx.g.get(&p).unwrap() + 1;
-    ctx.g.insert(q.clone(), nb);
+    let nb = ctx.g.get(p).unwrap() + 1;
+    ctx.g.insert(Rc::clone(q), nb);
     // saves the cost function for point p : h(p) + g(p)
-    ctx.f.insert(q.clone(), heuristic(&ctx, &q) + nb);
+    ctx.f.insert(Rc::clone(q), heuristic(&ctx, &q) + nb);
     // saves the fact that p is the parent of q
-    ctx.parents.insert(q.clone(), Some(p));
+    ctx.parents.insert(Rc::clone(q), Some(Rc::clone(p)));
 }
 
 // sorts the queue
-pub fn reorder_queue(ctx: &mut Context, queue: &mut Vec<Vec<usize>>) {
+pub fn reorder_queue(ctx: &mut Context, queue: &mut Vec<Rc<Vec<usize>>>) {
     queue.sort_unstable_by(|p, q| {
         if (ctx.f.get(p) > ctx.f.get(q))
             || (ctx.f.get(p) == ctx.f.get(q)
@@ -279,17 +280,17 @@ pub fn reorder_queue(ctx: &mut Context, queue: &mut Vec<Vec<usize>>) {
 }
 
 // ascend back up the parent tree to form the common string
-pub fn common_seq(ctx: &Context, p: &Vec<usize>) -> String {
+pub fn common_seq(ctx: &Context, p: Rc<Vec<usize>>) -> String {
     let ref_str: &Vec<char> = &ctx.chains[0];
     let mut common_sequence: Vec<char> = vec![];
     // Gaining mutability
     let mut p = p;
 
-    while *ctx.parents.get(p).unwrap() != None {
+    while *ctx.parents.get(&p).unwrap() != None {
         common_sequence.push(ref_str[p[0]]);
 
         // getting the parent of current point
-        p = &ctx.parents.get(p).unwrap().as_ref().unwrap();
+        p = ctx.parents.get(&p).unwrap().clone().expect("IMPOSSIBLE NONE");
     }
 
     common_sequence.iter().rev().collect::<String>()

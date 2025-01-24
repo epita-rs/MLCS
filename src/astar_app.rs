@@ -1,3 +1,4 @@
+use std::rc::Rc;
 use crate::utils::*;
 
 const _K: usize = 2000;
@@ -19,7 +20,7 @@ pub fn astar_app(chains: &Vec<&str>) -> String {
     let mut ctx = Context::new(chains);
 
     // queueueue
-    let mut queue: Vec<Vec<usize>> = vec![];
+    let mut queue: Vec<Rc<Vec<usize>>> = vec![];
     init_queue(&mut ctx, &mut queue);
 
     while queue.len() > 0 {
@@ -36,13 +37,13 @@ pub fn astar_app(chains: &Vec<&str>) -> String {
             .clone()
             .into_iter()
             .filter(|p| y <= f(&ctx, p))
-            .collect::<Vec<Vec<usize>>>();
+            .collect::<Vec<Rc<Vec<usize>>>>();
         queue.clear();
 
         for p in second_queue {
             if heuristic(&ctx, &p) == 0 {
                 // An MLCS match was found
-                return common_seq(&ctx, &p);
+                return common_seq(&ctx, p);
             } else {
                 // inserting all succesors in the queue
                 let succs = get_successors(&ctx, &p);
@@ -50,10 +51,10 @@ pub fn astar_app(chains: &Vec<&str>) -> String {
                     // basically saying if the queue queue does not already
                     // contain the point q
                     if !queue.contains(&q) {
-                        update_suc(&mut ctx, p.clone(), q.clone());
+                        update_suc(&mut ctx, &p, &q);
                         queue.push(q);
                     } else if g(&ctx, &q) < g(&ctx, &p) + 1 {
-                        update_suc(&mut ctx, p.clone(), q.clone());
+                        update_suc(&mut ctx, &p, &q);
                     }
                 }
             }

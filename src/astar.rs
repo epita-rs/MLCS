@@ -1,3 +1,4 @@
+use std::rc::Rc;
 use crate::utils::*;
 
 /// Outputs the Longest Common Subsequence among Multiple strings (MLCS)
@@ -14,24 +15,24 @@ pub fn mlcs_astar(chains: &Vec<&str>) -> String {
     // Preprocessing
     let mut ctx = Context::new(chains);
 
-    let mut queue: Vec<Vec<usize>> = vec![];
+    let mut queue: Vec<Rc<Vec<usize>>> = vec![];
     init_queue(&mut ctx, &mut queue);
 
     while queue.len() > 0 {
-        let p: Vec<usize> = queue.pop().unwrap().clone();
+        let p: Rc<Vec<usize>> = queue.pop().unwrap();
 
         if heuristic(&ctx, &p) == 0 {
             // An MLCS match was found
-            return common_seq(&ctx, &p);
+            return common_seq(&ctx, p);
         } else {
             // inserting all succesors in the queue
             let succs = get_successors(&ctx, &p);
             for q in succs {
                 // basically saying if the queue queue does not already
                 // contain the point q
-                update_suc(&mut ctx, p.clone(), q.clone());
+                update_suc(&mut ctx, &p, &q);
                 if !queue.contains(&q) {
-                    queue.push(q);
+                    queue.push(Rc::clone(&q));
                 }
             }
 
