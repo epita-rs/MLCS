@@ -124,7 +124,15 @@ fn score_matrix(s1: &[char], s2: &[char]) -> Vec<Vec<u64>> {
     matrix
 }
 
-// given the list of strings we compute the set of score matrices
+/// Computes the suffix tables used for the MLCS-Astar
+/// (Multiple-Longest-Common-Substring) matching algorithm.
+///
+/// # Arguments
+///
+/// * `chains` - A slice of collected strings from which the suffix table is computed.
+///
+/// # Returns
+///
 pub fn matrices_score(chains: &[Vec<char>]) -> Vec<Vec<Vec<u64>>> {
     let mut scores: Vec<Vec<Vec<u64>>> = vec![];
     for s1 in chains.iter() {

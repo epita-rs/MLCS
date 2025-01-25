@@ -1,16 +1,16 @@
 use crate::utils::*;
 
 
-/// Outputs the Longest Common Subsequence among Multiple strings (MLCS)
-///
+/// Outputs the Longest Common Subsequence among Multiple strings (LCSM)
+/// using a similar approach to the A* algorithm in graph theory
 /// # Arguments
 ///
 /// * `S` - Array of strings.
 ///
 /// # Returns
 ///
-/// * `String` if the strings are not anagrams.
-/// * `String::new("")' if no MLCS was found
+/// * `String` if a Longest Common Subsequence exists
+/// * `String::new("")' if no LCS was found
 pub fn astar_app(chains: &Vec<&str>) -> String {
 
     const C: u64 = 20;

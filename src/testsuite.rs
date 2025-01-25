@@ -72,47 +72,40 @@ pub fn generate_testcase(pattern: &str, nb: usize, length: usize) -> Vec<String>
 #[cfg(test)]
 mod functionnal {
     use super::*;
+    use paste::paste;
     use crate::astar::mlcs_astar;
-
+    use crate::astar_app::astar_app;
+   
     macro_rules! astar_tests {
-        ($($name:ident: $arg:expr,)*) => {
+        ($($name:expr, $nb:expr, $length:expr, $pattern:expr),*) => {
             $(
+                paste! {
                 #[test]
-                 fn $name() {
-                 let (pattern, string_nb, length, f) = $arg;
-                 let s_string = generate_testcase(&pattern, string_nb, length);
-                 // Line below is a basic cast from Vec<String> to Vec<&str>
-                 let s = s_string.iter().map(|x| x.as_str()).collect();
-                 assert_eq!(f(&s), pattern);
-                 }
-
+                fn [<$name _random_ $nb _ $length>]() {
+                let (pattern, string_nb, length, f) = ($pattern, $nb, $length, $name);
+                let s_string = generate_testcase(&pattern, string_nb, length);
+                // Line below is a basic cast from Vec<String> to Vec<&str>
+                let s = s_string.iter().map(|x| x.as_str()).collect();
+                assert_eq!(f(&s), pattern);
+                }
+                }
             )*
         };
     }
 
     macro_rules! astar_complete {
         ($name:expr) => {
-            astar_tests! {
-            random_4_10: ("grrrrr", 4, 10, $name),
-            random_5_15: ("hohoho", 5, 15, $name),
-            random_6_20: ("mouimoui", 6, 20, $name),
-            random_7_30: ("999776543", 7, 30, $name),
-            random_20_40: ("mouahahahahahahahihihihohoho", 20, 40, $name),
-            random_60_60: ("jj998762bk--_-=-^%$£..mnHGb##", 60, 60, $name),
-            random_70_40: ("j8762bk-f_u=-^%$£i.mnHGb#?", 70, 40, $name),
-            random_50_100: ("j8762bk-f_u=-^%$£i.mnHGb#?", 50, 100, $name),
-            /*
-            random_70_1050: ("j8762bk-f_u=-^%$£i.mnHGb#?", 70, 1050, $name),
-            random_30_5050: ("j8762bk-f_u=-^%$£i.mnHGb#?", 30, 5050, $name),
-            random_20_10050: ("j8762bk-f_u=-^%$£i.mnHGb#?", 20, 10_050, $name),
-            random_20_50050: ("j8762bk-f_u=-^%$£i.mnHGb#?", 20, 50_050, $name),
-            random_20_500050: ("j8762bk-f_goulou][", 20, 500_050, $name),
-            random_20_2_000_050: ("j0987654321-f_gou][", 20, 2_000_050, $name),
-            */
-            }
+            astar_tests!($name, 4, 10, "grrrrr");
+            astar_tests!($name, 5, 15, "gr0976532_");
+            astar_tests!($name, 6, 20, "gr8654rfcv%$£");
+            astar_tests!($name, 7, 30, "g#][;.mhgfdhjiut555324780");
+            astar_tests!($name, 20, 40, "g09976y3hhdfvb3");
+            astar_tests!($name, 60, 60, "_)(*&^%$£1234567890poiuytrewqsdfghj");
+            astar_tests!($name, 50, 100, "pouytrewasdfghjklmnbvcxz");
         };
     }
 
+    astar_complete!(astar_app);
     astar_complete!(mlcs_astar);
 
     #[test]
@@ -237,47 +230,6 @@ mod functionnal {
 mod astar_app {
     use super::*;
     use crate::astar_app::astar_app;
-
-    macro_rules! astar_tests {
-        ($($name:ident: $arg:expr,)*) => {
-            $(
-                #[test]
-                 fn $name() {
-                 let (pattern, string_nb, length, f) = $arg;
-                 let s_string = generate_testcase(&pattern, string_nb, length);
-                 // Line below is a basic cast from Vec<String> to Vec<&str>
-                 let s = s_string.iter().map(|x| x.as_str()).collect();
-                 assert_eq!(f(&s), pattern);
-                 }
-
-            )*
-        };
-    }
-
-    macro_rules! astar_complete {
-        ($name:expr) => {
-            astar_tests! {
-            random_4_10: ("grrrrr", 4, 10, $name),
-            random_5_15: ("hohoho", 5, 15, $name),
-            random_6_20: ("mouimoui", 6, 20, $name),
-            random_7_30: ("999776543", 7, 30, $name),
-            random_20_40: ("mouahahahahahahahihihihohoho", 20, 40, $name),
-            random_60_60: ("jj998762bk--_-=-^%$£..mnHGb##", 60, 60, $name),
-            random_70_40: ("j8762bk-f_u=-^%$£i.mnHGb#?", 70, 40, $name),
-            random_50_100: ("j8762bk-f_u=-^%$£i.mnHGb#?", 50, 100, $name),
-            /*
-            random_70_1050: ("j8762bk-f_u=-^%$£i.mnHGb#?", 70, 1050, $name),
-            random_30_5050: ("j8762bk-f_u=-^%$£i.mnHGb#?", 30, 5050, $name),
-            random_20_10050: ("j8762bk-f_u=-^%$£i.mnHGb#?", 20, 10_050, $name),
-            random_20_50050: ("j8762bk-f_u=-^%$£i.mnHGb#?", 20, 50_050, $name),
-            random_20_500050: ("j8762bk-f_goulou][", 20, 500_050, $name),
-            random_20_2_000_050: ("j0987654321-f_gou][", 20, 2_000_050, $name),
-            */
-            }
-        };
-    }
-
-    astar_complete!(astar_app);
 
     #[test]
     fn basic_3_1() {

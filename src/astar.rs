@@ -1,6 +1,6 @@
 use crate::utils::*;
 
-/// Outputs the Longest Common Subsequence among Multiple strings (MLCS)
+/// Outputs the Longest Common Subsequence among Multiple strings (LCSM)
 ///
 /// # Arguments
 ///
@@ -8,7 +8,7 @@ use crate::utils::*;
 ///
 /// # Returns
 ///
-/// * `String` if the strings are not anagrams.
+/// * `String` if a Longest Common Subsequence exists
 /// * `String::new("")' if no MLCS was found
 pub fn mlcs_astar(chains: &Vec<&str>) -> String {
     // Preprocessing

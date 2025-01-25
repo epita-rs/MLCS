@@ -12,6 +12,7 @@ harness = false
 path = "src/bench.rs"
 
 [dependencies]
+paste = "1.0.15"
 # this depency could be avoided because we are not concerned 
 # with security here, so we could write our light-weight own model
 rand = "0.8"
