@@ -274,11 +274,11 @@ pub fn reorder_queue(ctx: &mut Context, queue: &mut [Vec<usize>]) {
 }
 
 // ascend back up the parent tree to form the common string
-pub fn common_seq(ctx: &Context, p: &Vec<usize>) -> String {
+pub fn common_seq(ctx: &Context, p: Vec<usize>) -> String {
     let ref_str: &Vec<char> = &ctx.chains[0];
     let mut common_sequence: Vec<char> = vec![];
     // Gaining mutability
-    let mut p = p;
+    let mut p = &p;
 
     while ctx.parents.get(p).unwrap().is_some() {
         common_sequence.push(ref_str[p[0]]);

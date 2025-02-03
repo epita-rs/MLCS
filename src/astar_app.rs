@@ -43,7 +43,7 @@ pub fn astar_app(chains: &Vec<&str>) -> String {
         for p in second_queue {
             if heuristic(&ctx, &p) == 0 {
                 // An MLCS match was found
-                return common_seq(&ctx, &p);
+                return common_seq(&ctx, p);
             } else {
                 // inserting all succesors in the queue
                 let succs = get_successors(&ctx, &p);
