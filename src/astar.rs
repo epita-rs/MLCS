@@ -29,12 +29,14 @@ pub fn mlcs_astar(chains: &Vec<&str>) -> String {
             for q in succs {
                 // basically saying if the queue queue does not already
                 // contain the point q
-                update_suc(&mut ctx, p.clone(), q.clone());
-                if !queue.contains(&q) {
-                    queue.push(q);
+                if !queue.contains(&q) { 
+                    queue.push(q.clone());
                 }
+                else if * ctx.g.get(&q).unwrap() >= ctx.g.get(&p).unwrap() + 1 {
+                    continue;
+                }
+                update_suc(&mut ctx, p.clone(), q.clone());
             }
-
             reorder_queue(&mut ctx, &mut queue);
         }
     }
